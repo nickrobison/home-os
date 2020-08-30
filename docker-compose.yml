@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_DB=homeos
+      - POSTGRES_USER=homeos
+      - POSTGRES_PASSWORD=supersecret
+    ports:
+      - "5432:5432"
+  core:
+    build:
+      context: .
+      dockerfile: go/dev.Dockerfile
+    environment:
+      - GOBIN=/app/go/bin
+    depends_on:
+      - postgres
+    volumes:
+    - ./go:/app/go:cached
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
