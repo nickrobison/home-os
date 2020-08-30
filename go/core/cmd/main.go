@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	cm "github.com/go-chi/chi/middleware"
+	"github.com/nickrobison/home-os/core/api"
 	"github.com/nickrobison/home-os/middleware"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -27,6 +28,8 @@ func main() {
 		logger.Debug().Msg("I'm logging the version")
 		w.Write([]byte(fmt.Sprint("Version: 1\n")))
 	})
+
+	r.Mount("/api/v1", api.NewV1API())
 
 	http.ListenAndServe(":8080", r)
 }
