@@ -26,7 +26,7 @@ func main() {
 	r.Get("/version", func(w http.ResponseWriter, r *http.Request) {
 		logger := middleware.GetLogger(r)
 		logger.Debug().Msg("I'm logging the version")
-		w.Write([]byte(fmt.Sprint("Version: 1\n")))
+		w.Write([]byte(fmt.Sprintln("Version: 1")))
 	})
 
 	r.Mount("/api/v1", api.NewV1API())

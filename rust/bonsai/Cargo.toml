@@ -1,0 +1,16 @@
+[package]
+name = "bonsai"
+version = "0.1.0"
+authors = ["Nick Robison <nick@nickrobison.com>"]
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+capnp = "0.13"
+reqwest = { version = "0.10", features = ["json"] }
+tokio = { version = "0.2", features = ["full"] }
+
+[build-dependencies]
+capnpc = "0.13"
