@@ -21,5 +21,6 @@ services:
     - ./go:/app/go:cached
     ports:
       - "8080:8080"
+      - "8081:8081"
     stdin_open: true
     tty: true

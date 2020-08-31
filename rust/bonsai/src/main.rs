@@ -4,8 +4,14 @@ use capnp::serialize;
 
 use crate::registration_capnp::registration_request;
 
+mod client;
+
 pub mod registration_capnp {
     include!(concat!(env!("OUT_DIR"), "/registration_capnp.rs"));
+}
+
+pub mod metrics_capnp {
+    include!(concat!(env!("OUT_DIR"), "/metrics_capnp.rs"));
 }
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -41,5 +47,6 @@ async fn main() -> Result<()> {
         return Err("Registration failed".into());
     }
 
-    Ok(())
+    // Ok, now let's see if we can get some RPC stuff working
+    return client::main().await;
 }

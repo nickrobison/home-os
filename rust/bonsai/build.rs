@@ -13,5 +13,6 @@ fn main() {
         // Add the import path to the Golang
         .import_path(Path::new(gopath).join("src/zombiezen.com/go/capnproto2/std"))
         .file(path.join("registration.capnp"))
+        .file(path.join("metrics.capnp"))
         .run().expect("schema compiler command");
 }
