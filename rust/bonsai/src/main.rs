@@ -1,3 +1,5 @@
+extern crate rpc_lib;
+
 use std::{error, time};
 
 use capnp::serialize;
@@ -5,18 +7,11 @@ use clap::{App, Arg};
 use log::info;
 
 use crate::config::Config;
-use crate::registration_capnp::registration_request;
+use crate::rpc_lib::registration_capnp::registration_request;
+
 
 mod client;
 mod config;
-
-pub mod registration_capnp {
-    include!(concat!(env!("OUT_DIR"), "/registration_capnp.rs"));
-}
-
-pub mod metrics_capnp {
-    include!(concat!(env!("OUT_DIR"), "/metrics_capnp.rs"));
-}
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 

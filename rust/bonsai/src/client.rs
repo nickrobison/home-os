@@ -2,7 +2,7 @@ use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
 use futures::{AsyncReadExt, FutureExt};
 
 use crate::config::Config;
-use crate::metrics_capnp::metrics;
+use crate::rpc_lib::metrics_capnp::metrics;
 
 pub async fn main(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     tokio::task::LocalSet::new().run_until(try_main(config)).await

@@ -7,7 +7,7 @@ fn main() {
     let path_env = env::var_os("GOPATH").unwrap();
     let gopath = path_env.to_str().unwrap();
     let dir = env::current_dir().unwrap();
-    let path = dir.join("../../protocols");
+    let path = dir.join("../../../../protocols");
     capnpc::CompilerCommand::new()
         .src_prefix(path.as_path())
         // Add the import path to the Golang
