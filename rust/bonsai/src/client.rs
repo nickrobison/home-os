@@ -1,20 +1,17 @@
-use std::{thread, time};
-
 use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
 use futures::{AsyncReadExt, FutureExt};
 
+use crate::config::Config;
 use crate::metrics_capnp::metrics;
 
-const TEN_SECONDS: time::Duration = time::Duration::from_secs(10);
-
-pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tokio::task::LocalSet::new().run_until(try_main()).await
+pub async fn main(config: Config) -> Result<(), Box<dyn std::error::Error>> {
+    tokio::task::LocalSet::new().run_until(try_main(config)).await
 }
 
-async fn try_main() -> Result<(), Box<dyn std::error::Error>> {
+async fn try_main(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     use std::net::ToSocketAddrs;
 
-    let addr = "localhost:8081".to_socket_addrs()?.next().expect("Could not parse address");
+    let addr = config.core_host.to_socket_addrs()?.next().expect("Could not parse address");
     let stream = tokio::net::TcpStream::connect(&addr).await?;
     stream.set_nodelay(true)?;
 
@@ -31,7 +28,7 @@ async fn try_main() -> Result<(), Box<dyn std::error::Error>> {
         request.get().set_name("Test Metric");
         request.get().set_value(3.14);
         request.send().promise.await?;
-        std::thread::sleep(TEN_SECONDS);
+        std::thread::sleep(config.frequency);
     }
 
     Ok(())
