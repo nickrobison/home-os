@@ -36,9 +36,31 @@ func (c Metrics) Submit(ctx context.Context, params func(Metrics_submit_Params) 
 	}
 	return Metrics_submit_Results_Promise{Pipeline: capnp.NewPipeline(c.Client.Call(call))}
 }
+func (c Metrics) Create(ctx context.Context, params func(Metrics_create_Params) error, opts ...capnp.CallOption) Metrics_create_Results_Promise {
+	if c.Client == nil {
+		return Metrics_create_Results_Promise{Pipeline: capnp.NewPipeline(capnp.ErrorAnswer(capnp.ErrNullClient))}
+	}
+	call := &capnp.Call{
+		Ctx: ctx,
+		Method: capnp.Method{
+			InterfaceID:   0xb8c43d882114c266,
+			MethodID:      1,
+			InterfaceName: "protocols/metrics.capnp:Metrics",
+			MethodName:    "create",
+		},
+		Options: capnp.NewCallOptions(opts),
+	}
+	if params != nil {
+		call.ParamsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		call.ParamsFunc = func(s capnp.Struct) error { return params(Metrics_create_Params{Struct: s}) }
+	}
+	return Metrics_create_Results_Promise{Pipeline: capnp.NewPipeline(c.Client.Call(call))}
+}
 
 type Metrics_Server interface {
 	Submit(Metrics_submit) error
+
+	Create(Metrics_create) error
 }
 
 func Metrics_ServerToClient(s Metrics_Server) Metrics {
@@ -48,7 +70,7 @@ func Metrics_ServerToClient(s Metrics_Server) Metrics {
 
 func Metrics_Methods(methods []server.Method, s Metrics_Server) []server.Method {
 	if cap(methods) == 0 {
-		methods = make([]server.Method, 0, 1)
+		methods = make([]server.Method, 0, 2)
 	}
 
 	methods = append(methods, server.Method{
@@ -65,6 +87,20 @@ func Metrics_Methods(methods []server.Method, s Metrics_Server) []server.Method 
 		ResultsSize: capnp.ObjectSize{DataSize: 0, PointerCount: 0},
 	})
 
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb8c43d882114c266,
+			MethodID:      1,
+			InterfaceName: "protocols/metrics.capnp:Metrics",
+			MethodName:    "create",
+		},
+		Impl: func(c context.Context, opts capnp.CallOptions, p, r capnp.Struct) error {
+			call := Metrics_create{c, opts, Metrics_create_Params{Struct: p}, Metrics_create_Results{Struct: r}}
+			return s.Create(call)
+		},
+		ResultsSize: capnp.ObjectSize{DataSize: 0, PointerCount: 1},
+	})
+
 	return methods
 }
 
@@ -74,6 +110,14 @@ type Metrics_submit struct {
 	Options capnp.CallOptions
 	Params  Metrics_submit_Params
 	Results Metrics_submit_Results
+}
+
+// Metrics_create holds the arguments for a server call to Metrics.create.
+type Metrics_create struct {
+	Ctx     context.Context
+	Options capnp.CallOptions
+	Params  Metrics_create_Params
+	Results Metrics_create_Results
 }
 
 type Metrics_submit_Params struct{ capnp.Struct }
@@ -213,28 +257,383 @@ func (p Metrics_submit_Results_Promise) Struct() (Metrics_submit_Results, error)
 	return Metrics_submit_Results{s}, err
 }
 
-const schema_b1de3984a98f80b1 = "x\xda\x8c\x8f\xb1J3A\x00\x84gv\xf7\xfe\xfb!" +
-	"\x81\xb8\x98\"]\"\xa6P\xc1h\xc4\xc6\x80$\x8dX" +
-	"\x09Y\x0b\xfb5\x9c\x10\xc8%\xc7\xed\x9d\xa2\x95E\x02" +
-	"\x82\x85\xf8\x00>\x80e\x10\xc1Zl\xac\xed-,\x85" +
-	"\xbc\x82'!(6\x82\xe50\xc3\xf71s\xb6%\xea" +
-	"^\x81\x80\xc9{\xff\xb2\xa3\xc7\xe2\xc2\xc5\xf6\xd3\x03t" +
-	"If\xe3\xf3\xab\xdb\xe1\xd6\xeb\x18`=\x14\xd4\xa7>" +
-	"\xa0\xd3]}\xe3\x03\xd9|\xe9}t\xb7\xf3\xf6\x02S" +
-	"!\x01\x8f>P\x1f\xc5\x04\xf5\xf5\x09\x98-\x1e<\xdf" +
-	"\x0f'\x97\x1f\xd0\x15\x02j\xdaN\xce\x08\x95E\xf1 " +
-	"\x19t\x06=\xe9\xd6\xc2 \x89\xbb\x1dW\xeb\xd8\xa8\x1f" +
-	"5\xf6f\x09m\xd2(\xe9\xfdp\xf0\x0b\xa6u\x03B" +
-	"{~\xd3\xa5\x87a7i\xb1M~\x03\xd5/\xc0\xda" +
-	"l\\m\x97mlCg\xfeK\x05(\x02zy\x05" +
-	"0UI\xb3.H\x16\xa7?\xf4\xea\x06`\x96$\xcd" +
-	"\xa6`\xa1o\xc3\x80y\x08\xe6\xc1\xf2\xb1\xed\xa5\x01s" +
-	"\x10\xcc\xe1\xef\xd6\xfdf\xe0\xd2^\xe2>\x03\x00\x00\xff" +
-	"\xffl\x87hC"
+type Metrics_create_Params struct{ capnp.Struct }
+
+// Metrics_create_Params_TypeID is the unique identifier for the type Metrics_create_Params.
+const Metrics_create_Params_TypeID = 0x8290291d4d05c8e4
+
+func NewMetrics_create_Params(s *capnp.Segment) (Metrics_create_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return Metrics_create_Params{st}, err
+}
+
+func NewRootMetrics_create_Params(s *capnp.Segment) (Metrics_create_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return Metrics_create_Params{st}, err
+}
+
+func ReadRootMetrics_create_Params(msg *capnp.Message) (Metrics_create_Params, error) {
+	root, err := msg.RootPtr()
+	return Metrics_create_Params{root.Struct()}, err
+}
+
+func (s Metrics_create_Params) String() string {
+	str, _ := text.Marshal(0x8290291d4d05c8e4, s.Struct)
+	return str
+}
+
+func (s Metrics_create_Params) Name() (string, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.Text(), err
+}
+
+func (s Metrics_create_Params) HasName() bool {
+	p, err := s.Struct.Ptr(0)
+	return p.IsValid() || err != nil
+}
+
+func (s Metrics_create_Params) NameBytes() ([]byte, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s Metrics_create_Params) SetName(v string) error {
+	return s.Struct.SetText(0, v)
+}
+
+// Metrics_create_Params_List is a list of Metrics_create_Params.
+type Metrics_create_Params_List struct{ capnp.List }
+
+// NewMetrics_create_Params creates a new list of Metrics_create_Params.
+func NewMetrics_create_Params_List(s *capnp.Segment, sz int32) (Metrics_create_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return Metrics_create_Params_List{l}, err
+}
+
+func (s Metrics_create_Params_List) At(i int) Metrics_create_Params {
+	return Metrics_create_Params{s.List.Struct(i)}
+}
+
+func (s Metrics_create_Params_List) Set(i int, v Metrics_create_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s Metrics_create_Params_List) String() string {
+	str, _ := text.MarshalList(0x8290291d4d05c8e4, s.List)
+	return str
+}
+
+// Metrics_create_Params_Promise is a wrapper for a Metrics_create_Params promised by a client call.
+type Metrics_create_Params_Promise struct{ *capnp.Pipeline }
+
+func (p Metrics_create_Params_Promise) Struct() (Metrics_create_Params, error) {
+	s, err := p.Pipeline.Struct()
+	return Metrics_create_Params{s}, err
+}
+
+type Metrics_create_Results struct{ capnp.Struct }
+
+// Metrics_create_Results_TypeID is the unique identifier for the type Metrics_create_Results.
+const Metrics_create_Results_TypeID = 0xe835f309b053731c
+
+func NewMetrics_create_Results(s *capnp.Segment) (Metrics_create_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return Metrics_create_Results{st}, err
+}
+
+func NewRootMetrics_create_Results(s *capnp.Segment) (Metrics_create_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return Metrics_create_Results{st}, err
+}
+
+func ReadRootMetrics_create_Results(msg *capnp.Message) (Metrics_create_Results, error) {
+	root, err := msg.RootPtr()
+	return Metrics_create_Results{root.Struct()}, err
+}
+
+func (s Metrics_create_Results) String() string {
+	str, _ := text.Marshal(0xe835f309b053731c, s.Struct)
+	return str
+}
+
+func (s Metrics_create_Results) Writer() MetricsWriter {
+	p, _ := s.Struct.Ptr(0)
+	return MetricsWriter{Client: p.Interface().Client()}
+}
+
+func (s Metrics_create_Results) HasWriter() bool {
+	p, err := s.Struct.Ptr(0)
+	return p.IsValid() || err != nil
+}
+
+func (s Metrics_create_Results) SetWriter(v MetricsWriter) error {
+	if v.Client == nil {
+		return s.Struct.SetPtr(0, capnp.Ptr{})
+	}
+	seg := s.Segment()
+	in := capnp.NewInterface(seg, seg.Message().AddCap(v.Client))
+	return s.Struct.SetPtr(0, in.ToPtr())
+}
+
+// Metrics_create_Results_List is a list of Metrics_create_Results.
+type Metrics_create_Results_List struct{ capnp.List }
+
+// NewMetrics_create_Results creates a new list of Metrics_create_Results.
+func NewMetrics_create_Results_List(s *capnp.Segment, sz int32) (Metrics_create_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return Metrics_create_Results_List{l}, err
+}
+
+func (s Metrics_create_Results_List) At(i int) Metrics_create_Results {
+	return Metrics_create_Results{s.List.Struct(i)}
+}
+
+func (s Metrics_create_Results_List) Set(i int, v Metrics_create_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s Metrics_create_Results_List) String() string {
+	str, _ := text.MarshalList(0xe835f309b053731c, s.List)
+	return str
+}
+
+// Metrics_create_Results_Promise is a wrapper for a Metrics_create_Results promised by a client call.
+type Metrics_create_Results_Promise struct{ *capnp.Pipeline }
+
+func (p Metrics_create_Results_Promise) Struct() (Metrics_create_Results, error) {
+	s, err := p.Pipeline.Struct()
+	return Metrics_create_Results{s}, err
+}
+
+func (p Metrics_create_Results_Promise) Writer() MetricsWriter {
+	return MetricsWriter{Client: p.Pipeline.GetPipeline(0).Client()}
+}
+
+type MetricsWriter struct{ Client capnp.Client }
+
+// MetricsWriter_TypeID is the unique identifier for the type MetricsWriter.
+const MetricsWriter_TypeID = 0xb72f0e43dfa1dd4e
+
+func (c MetricsWriter) Write(ctx context.Context, params func(MetricsWriter_write_Params) error, opts ...capnp.CallOption) MetricsWriter_write_Results_Promise {
+	if c.Client == nil {
+		return MetricsWriter_write_Results_Promise{Pipeline: capnp.NewPipeline(capnp.ErrorAnswer(capnp.ErrNullClient))}
+	}
+	call := &capnp.Call{
+		Ctx: ctx,
+		Method: capnp.Method{
+			InterfaceID:   0xb72f0e43dfa1dd4e,
+			MethodID:      0,
+			InterfaceName: "protocols/metrics.capnp:MetricsWriter",
+			MethodName:    "write",
+		},
+		Options: capnp.NewCallOptions(opts),
+	}
+	if params != nil {
+		call.ParamsSize = capnp.ObjectSize{DataSize: 8, PointerCount: 0}
+		call.ParamsFunc = func(s capnp.Struct) error { return params(MetricsWriter_write_Params{Struct: s}) }
+	}
+	return MetricsWriter_write_Results_Promise{Pipeline: capnp.NewPipeline(c.Client.Call(call))}
+}
+
+type MetricsWriter_Server interface {
+	Write(MetricsWriter_write) error
+}
+
+func MetricsWriter_ServerToClient(s MetricsWriter_Server) MetricsWriter {
+	c, _ := s.(server.Closer)
+	return MetricsWriter{Client: server.New(MetricsWriter_Methods(nil, s), c)}
+}
+
+func MetricsWriter_Methods(methods []server.Method, s MetricsWriter_Server) []server.Method {
+	if cap(methods) == 0 {
+		methods = make([]server.Method, 0, 1)
+	}
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb72f0e43dfa1dd4e,
+			MethodID:      0,
+			InterfaceName: "protocols/metrics.capnp:MetricsWriter",
+			MethodName:    "write",
+		},
+		Impl: func(c context.Context, opts capnp.CallOptions, p, r capnp.Struct) error {
+			call := MetricsWriter_write{c, opts, MetricsWriter_write_Params{Struct: p}, MetricsWriter_write_Results{Struct: r}}
+			return s.Write(call)
+		},
+		ResultsSize: capnp.ObjectSize{DataSize: 0, PointerCount: 0},
+	})
+
+	return methods
+}
+
+// MetricsWriter_write holds the arguments for a server call to MetricsWriter.write.
+type MetricsWriter_write struct {
+	Ctx     context.Context
+	Options capnp.CallOptions
+	Params  MetricsWriter_write_Params
+	Results MetricsWriter_write_Results
+}
+
+type MetricsWriter_write_Params struct{ capnp.Struct }
+
+// MetricsWriter_write_Params_TypeID is the unique identifier for the type MetricsWriter_write_Params.
+const MetricsWriter_write_Params_TypeID = 0x908bc1569eec1e66
+
+func NewMetricsWriter_write_Params(s *capnp.Segment) (MetricsWriter_write_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0})
+	return MetricsWriter_write_Params{st}, err
+}
+
+func NewRootMetricsWriter_write_Params(s *capnp.Segment) (MetricsWriter_write_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0})
+	return MetricsWriter_write_Params{st}, err
+}
+
+func ReadRootMetricsWriter_write_Params(msg *capnp.Message) (MetricsWriter_write_Params, error) {
+	root, err := msg.RootPtr()
+	return MetricsWriter_write_Params{root.Struct()}, err
+}
+
+func (s MetricsWriter_write_Params) String() string {
+	str, _ := text.Marshal(0x908bc1569eec1e66, s.Struct)
+	return str
+}
+
+func (s MetricsWriter_write_Params) Value() float64 {
+	return math.Float64frombits(s.Struct.Uint64(0))
+}
+
+func (s MetricsWriter_write_Params) SetValue(v float64) {
+	s.Struct.SetUint64(0, math.Float64bits(v))
+}
+
+// MetricsWriter_write_Params_List is a list of MetricsWriter_write_Params.
+type MetricsWriter_write_Params_List struct{ capnp.List }
+
+// NewMetricsWriter_write_Params creates a new list of MetricsWriter_write_Params.
+func NewMetricsWriter_write_Params_List(s *capnp.Segment, sz int32) (MetricsWriter_write_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0}, sz)
+	return MetricsWriter_write_Params_List{l}, err
+}
+
+func (s MetricsWriter_write_Params_List) At(i int) MetricsWriter_write_Params {
+	return MetricsWriter_write_Params{s.List.Struct(i)}
+}
+
+func (s MetricsWriter_write_Params_List) Set(i int, v MetricsWriter_write_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s MetricsWriter_write_Params_List) String() string {
+	str, _ := text.MarshalList(0x908bc1569eec1e66, s.List)
+	return str
+}
+
+// MetricsWriter_write_Params_Promise is a wrapper for a MetricsWriter_write_Params promised by a client call.
+type MetricsWriter_write_Params_Promise struct{ *capnp.Pipeline }
+
+func (p MetricsWriter_write_Params_Promise) Struct() (MetricsWriter_write_Params, error) {
+	s, err := p.Pipeline.Struct()
+	return MetricsWriter_write_Params{s}, err
+}
+
+type MetricsWriter_write_Results struct{ capnp.Struct }
+
+// MetricsWriter_write_Results_TypeID is the unique identifier for the type MetricsWriter_write_Results.
+const MetricsWriter_write_Results_TypeID = 0xe3eae7ab19410b5e
+
+func NewMetricsWriter_write_Results(s *capnp.Segment) (MetricsWriter_write_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return MetricsWriter_write_Results{st}, err
+}
+
+func NewRootMetricsWriter_write_Results(s *capnp.Segment) (MetricsWriter_write_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return MetricsWriter_write_Results{st}, err
+}
+
+func ReadRootMetricsWriter_write_Results(msg *capnp.Message) (MetricsWriter_write_Results, error) {
+	root, err := msg.RootPtr()
+	return MetricsWriter_write_Results{root.Struct()}, err
+}
+
+func (s MetricsWriter_write_Results) String() string {
+	str, _ := text.Marshal(0xe3eae7ab19410b5e, s.Struct)
+	return str
+}
+
+// MetricsWriter_write_Results_List is a list of MetricsWriter_write_Results.
+type MetricsWriter_write_Results_List struct{ capnp.List }
+
+// NewMetricsWriter_write_Results creates a new list of MetricsWriter_write_Results.
+func NewMetricsWriter_write_Results_List(s *capnp.Segment, sz int32) (MetricsWriter_write_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return MetricsWriter_write_Results_List{l}, err
+}
+
+func (s MetricsWriter_write_Results_List) At(i int) MetricsWriter_write_Results {
+	return MetricsWriter_write_Results{s.List.Struct(i)}
+}
+
+func (s MetricsWriter_write_Results_List) Set(i int, v MetricsWriter_write_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s MetricsWriter_write_Results_List) String() string {
+	str, _ := text.MarshalList(0xe3eae7ab19410b5e, s.List)
+	return str
+}
+
+// MetricsWriter_write_Results_Promise is a wrapper for a MetricsWriter_write_Results promised by a client call.
+type MetricsWriter_write_Results_Promise struct{ *capnp.Pipeline }
+
+func (p MetricsWriter_write_Results_Promise) Struct() (MetricsWriter_write_Results, error) {
+	s, err := p.Pipeline.Struct()
+	return MetricsWriter_write_Results{s}, err
+}
+
+const schema_b1de3984a98f80b1 = "x\xda\x8c\x93Ah\xd3P\x18\xc7\xbf\xffKb&]" +
+	"\xd5GzXAm\xc5:\x9c\xe0\xe6:=X\x90T" +
+	"D\xc4\xc3\xa4\x998\xf1\"\xc4\xf2\x06\x85v-/\x89" +
+	"\x03O\"+\x0a;\xb8\xb3\x07A\xc1\x83x\xb1\xc8\xd0" +
+	"\xebD\xd0\x1d<y\xf2\xa0\x82\x0a\xca\xd0\x93\xf7E^" +
+	"j\xd2U)\xf6\x94\x84\xf7\xff~\xdf\x97\xff\xff{{" +
+	"\xb6\xcal\xdax\xcd\x88\x9c\xbc\xb1#\xfc\xfa\xc6\x98\xdd" +
+	"7\xb1z\x8bx\x1eD\x06L\xa2\x99\xf3\x90 X\x97" +
+	"`\x13\xc2\x85\xfd?\xee\xcf\xaf\xaf\xac\x923\x0e\x10\xe9" +
+	"J\x10\xe0\x9e\x12\xb4#\xc1\x85\x0f\x0f>\x9d\xd95\xf5" +
+	"\x9c\xf8\x98\x16vn\xde}\xbc|\xf2c\x87\x083\x8f" +
+	"P\x84\xb5\xa6\x88V\x07\xe7\xac\xf7\xea-\\x\x999" +
+	"p\xe7\xd4\xab\x17\xff\xa8\xd7\xc1`\xbd\x8d\xd4\x1b\xb8m" +
+	"e\x99R[c\x9b\xedgg?\xbf#'\x8fd<" +
+	"\xb0h\xbc4[\"\x84WS\xa7\xb3O\xbem~!" +
+	">\x1eOWc\x0fAz\xb8\xd7\xbb\xf8t\xe7\xaf\x13" +
+	"\xdf\xb7\xff\xd9\x15vC\x95\x0a\xa6\x06?8\xbf\xb1\xb6" +
+	"\xfcse\xab+\x88J\xdb\xea\\\x0f[\xb2\xe97\xab" +
+	"\xcd\xba\xeeM5\x84/kUo\xb2\xea\xb6\x16[\xa5" +
+	"\xd9\xf8K\x0a\xd7\x17\x85J\xce\x95n\xc3stM'" +
+	"\xd2A\xc4\xd3G\x88\x9c\x11\x0dN\x86a\xf7\xa2\xdb\x10" +
+	"\x18%\x86QB\xc24\x060/\xcb\x9a/\xe4\xe4\x92" +
+	"z\x14*\xaet\xb5~p\xb1\x07\xce]w\xeb\x81@" +
+	"\x8a\x18R\xdb\xc8\xda r.BW\x00G\xd7\x0c\x95" +
+	"\xc1\x9fH\x11\x9b\xc7y\x91\x187\xcc\\\xd4\xbd\x8c\x0a" +
+	"\xfeO%\xc5\x1b\x89xqJ\x88\x1d\xe5\xd3%b\xfc" +
+	"\x90\x09$\xfb\x858\x0e\x9eUgi\xd3\xf6\x82k\x8d" +
+	"\x9a_\x86\xdd5\xb3\xbf\xeb@\xe7\xbbU\x89\xf3#\x89" +
+	"A\x13\xca\xf9\x82\x06\xe7\x18\x03\x90Q\xeb\xc2\x8f*\xd3" +
+	"\x0ekp\x8e\xff\x95\xc6\x00\x07\x87\xcafNx\x81Y" +
+	"\xf7\xbd\xa1\xb7d\xce\x16^P\xf7\xfb\xd2,\xf5\xd2\xb4" +
+	"#\xac\x04\xef\xdd$\x028\x0doF\xdc\xe0w\x00\x00" +
+	"\x00\xff\xffQi\x1c\xbc"
 
 func init() {
 	schemas.Register(schema_b1de3984a98f80b1,
+		0x8290291d4d05c8e4,
+		0x908bc1569eec1e66,
+		0xb72f0e43dfa1dd4e,
 		0xb8c43d882114c266,
 		0xd3e245b385ea1813,
+		0xe3eae7ab19410b5e,
+		0xe835f309b053731c,
 		0xfe8bed84b5c95623)
 }

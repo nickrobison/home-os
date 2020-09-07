@@ -23,9 +23,15 @@ async fn try_main(config: Config) -> Result<(), Box<dyn std::error::Error>> {
     let metrics: metrics::Client = rpc_system.bootstrap(rpc_twoparty_capnp::Side::Server);
     tokio::task::spawn_local(Box::pin(rpc_system.map(|_| ())));
 
+    // Request a Metric writer
+    let mut create = metrics.create_request();
+    create.get().set_name("Test_Metric");
+
+    // Well, that's a lot of unwrapping
+    let writer = create.send().promise.await?.get()?.get_writer()?;
+
     loop {
-        let mut request = metrics.submit_request();
-        request.get().set_name("Test Metric");
+        let mut request = writer.write_request();
         request.get().set_value(3.14);
         request.send().promise.await?;
         std::thread::sleep(config.frequency);
