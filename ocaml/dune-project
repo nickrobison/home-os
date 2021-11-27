@@ -1,0 +1,27 @@
+(lang dune 2.8)
+(name homeos)
+(version 0.0.1)
+
+(generate_opam_files true)
+
+(source (github nickrobison/homeos))
+(license MIT)
+(authors "Nick Robison")
+(maintainers "nick@nickrobison.com")
+
+(package
+  (name registrar)
+  (synopsis "Core service registration component")
+  (depends
+    (alcotest :with-test)
+    (dune (> 1.5))
+    logs
+    capnp
+    capnp-rpc-net))
+
+(package
+  (name registrar-unix)
+  (synopsis "Unix implementation of Registrar")
+  (depends
+    registrar
+    capnp-rpc-unix))
