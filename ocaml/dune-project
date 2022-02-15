@@ -1,27 +1,32 @@
 (lang dune 2.8)
-(name homeos)
+(name home-os)
 (version 0.0.1)
 
 (generate_opam_files true)
 
-(source (github nickrobison/homeos))
-(license MIT)
-(authors "Nick Robison")
-(maintainers "nick@nickrobison.com")
+(source (github nickrobison/home-os))
+(maintainers "Nick Robison <nick@nickrobison.com>")
+(authors "Nick Robison <nick@nickrobison.com>")
 
 (package
-  (name registrar)
-  (synopsis "Core service registration component")
+  (name conductor)
+  (synopsis "Core HomeOS conductor library")
   (depends
     (alcotest :with-test)
     (dune (> 1.5))
+    capnp-rpc-lwt
     logs
-    capnp
-    capnp-rpc-net))
+    fmt
+    irmin
+    ppx_irmin))
+
 
 (package
-  (name registrar-unix)
-  (synopsis "Unix implementation of Registrar")
+  (name conductor-unix)
+  (synopsis "HomeOS Conductor application")
   (depends
-    registrar
-    capnp-rpc-unix))
+    cmdliner
+    logs
+    capnp-rpc-unix
+    irmin-unix
+    (alcotest :with-test)))
