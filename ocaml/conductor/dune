@@ -1,26 +1,32 @@
 (library
-  (name conductor)
-  (ocamlc_flags :standard -w -55-53)
-  (ocamlopt_flags :standard -w -55-53)
-  (libraries capnp capnp-rpc-lwt logs lwt conductor.protocols))
+ (name conductor)
+ (ocamlc_flags :standard -w -55-53)
+ (ocamlopt_flags :standard -w -55-53)
+ (libraries capnp capnp-rpc-lwt logs lwt conductor.protocols))
 
 ;(rule
 ;  (targets registrar_api.mli registrar_api.ml)
 ;  (deps api.capnp)
 ;  (action (run capnp compile -I../../../../protocols -o %{bin:capnpc-ocaml} %{deps})))
 
-(subdir protocols
-
-    (library
-      (name conductor_protocols)
-      (public_name conductor.protocols)
-      (ocamlc_flags :standard -w -55-53)
-      (ocamlopt_flags :standard -w -55-53)
-      (libraries capnp))
-
-    (rule
-      (targets registration.mli registration.ml services.mli services.ml metrics.ml metrics.mli registrar.ml registrar.mli)
-      (deps registration.capnp services.capnp metrics.capnp registrar.capnp)
-      (action (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
-)
-
+(subdir
+ protocols
+ (library
+  (name conductor_protocols)
+  (public_name conductor.protocols)
+  (ocamlc_flags :standard -w -55-53)
+  (ocamlopt_flags :standard -w -55-53)
+  (libraries capnp))
+ (rule
+  (targets
+   registration.mli
+   registration.ml
+   services.mli
+   services.ml
+   metrics.ml
+   metrics.mli
+   registrar.ml
+   registrar.mli)
+  (deps registration.capnp services.capnp metrics.capnp registrar.capnp)
+  (action
+   (run capnp compile -o %{bin:capnpc-ocaml} %{deps}))))
