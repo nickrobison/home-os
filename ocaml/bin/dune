@@ -1,0 +1,5 @@
+(executable
+  (name main)
+  (public_name conductor)
+  (package conductor-unix)
+  (libraries conductor cmdliner lwt logs.fmt logs.cli fmt.cli fmt.tty capnp-rpc-unix))

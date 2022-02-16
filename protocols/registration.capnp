@@ -9,7 +9,7 @@ struct RegistrationRequest {
 
 struct RegistrationResponse {
     union {
-        success @0 :ServiceManager;
+        success @0 :Services.ServiceManager;
         failure @1 :Text;
     }
 }
