@@ -1,13 +1,22 @@
-use std::error;
+extern crate pinger_rpc;
 
 use logs::info;
 
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+use types::Result;
 
+use crate::config::Config;
+
+mod types;
+mod client;
+mod config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::init();
     info!("Starting!");
-    return Ok(())
+
+    // Create the config
+    let conf = Config::new("127.0.0.1:7000".to_string())?;
+    info!("Connecting to: {}", conf.host);
+    return client::main(conf).await;
 }

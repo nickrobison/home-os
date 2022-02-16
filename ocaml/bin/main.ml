@@ -18,7 +18,7 @@ let start_server =
        Capnp_rpc_unix.Vat_config.create ~serve_tls:false ~secret_key
          listen_address
      in
-     let service_id = Capnp_rpc_unix.Vat_config.derived_id config "registrar" in
+     let service_id = Capnp_rpc_net.Restorer.Id.public "" in
      let restore =
        Capnp_rpc_net.Restorer.single service_id Conductor__.Registrar.local
      in
