@@ -1,9 +1,9 @@
 use std::net::ToSocketAddrs;
 
 use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
+use crossbeam::channel::bounded;
 use futures::{AsyncReadExt, FutureExt};
 use logs::info;
-use tokio::sync::oneshot;
 
 use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
@@ -40,10 +40,14 @@ async fn try_main(conf: Config) -> Result<()> {
         .set_name("Rust Test");
 
     // Add the callback
-    let (tx, _rx) = oneshot::channel();
+    let (tx, rx) = bounded(1);
     let callback: registration_callback::Client = capnp_rpc::new_client(RegistrationCallbackImpl { sender: tx });
     req.get().set_callback(callback);
 
     let _ = req.send().promise.await?;
+
+    let resp = rx.recv().unwrap();
+
+
     Ok(())
 }

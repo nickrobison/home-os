@@ -4,12 +4,11 @@ using Services = import "services.capnp";
 
 struct RegistrationRequest {
     name @0 :Text;
-    callback @1 :Text;
 }
 
 struct RegistrationResponse {
     union {
-        success @0 :List(Services.Service);
+        success @0 :Services.ServiceResolver;
         failure @1 :Text;
     }
 }

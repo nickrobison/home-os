@@ -8,16 +8,27 @@ module Api = Conductor_protocols.Registrar.MakeRPC (Capnp_rpc_lwt)
 module RP = Conductor_protocols.Registration.Make (Capnp.BytesMessage)
 
 module Callback = struct
-  let callback t _resp =
-    let open Api.Client.RegistrationCallback.Callback in
+
+  let succeed t resolver =
+    let open Api.Client.RegistrationCallback.Success in
     let request, params = Capability.Request.create Params.init_pointer in
-    let builder = Params.response_init params in
-    RP.Builder.RegistrationResponse.failure_set builder "So close";
+    Params.resolver_set params (Some resolver);
     Capability.call_for_unit_exn t method_id request
+
+  let fail t msg =
+    let open Api.Client.RegistrationCallback.Failure in
+    let request, params = Capability.Request.create Params.init_pointer in
+    Params.err_set params msg;
+    Capability.call_for_unit_exn t method_id request
+
+
 end
 
-let notify callback ~resp =
-  Callback.callback callback resp >|= fun () ->
+let handle_registration callback ~name =
+  Log.info (fun m ->m"Successfully registered %s" name);
+  (* Create a new service resolver and return it*)
+  let resolver = Service_resolver.make name in
+  Callback.succeed callback resolver >|= fun () ->
   Ok (Service.Response.create_empty ())
 
 let local =
@@ -37,7 +48,5 @@ let local =
          | None -> Service.fail "No callback"
          | Some callback ->
              Service.return_lwt @@ fun () ->
-             let resp = RP.Builder.RegistrationResponse.init_root () in
-             RP.Builder.RegistrationResponse.failure_set resp "So close";
-             Capability.with_ref callback (notify ~resp)
+             Capability.with_ref callback (handle_registration ~name)
      end

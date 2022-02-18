@@ -16,6 +16,10 @@ struct Service {
     }
 }
 
+interface ServiceResolver {
+    resolve @0 () -> (services :List(Service));
+}
+
 interface ServiceManager {
-    list @0 () -> (services :List(Service));
+  list @0 () -> (services :List(Service));
 }
