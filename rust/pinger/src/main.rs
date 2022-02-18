@@ -9,6 +9,7 @@ use crate::config::Config;
 mod types;
 mod client;
 mod config;
+mod callback;
 
 #[tokio::main]
 async fn main() -> Result<()> {

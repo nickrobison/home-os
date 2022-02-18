@@ -3,7 +3,7 @@
 using Registration = import "registration.capnp";
 
 interface Registrar {
-    register @0 (request :Registration.RegistrationRequest) -> ();
+    register @0 (request :Registration.RegistrationRequest, callback :RegistrationCallback) -> ();
 }
 
 interface RegistrationCallback {

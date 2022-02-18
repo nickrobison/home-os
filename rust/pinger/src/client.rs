@@ -3,9 +3,11 @@ use std::net::ToSocketAddrs;
 use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
 use futures::{AsyncReadExt, FutureExt};
 use logs::info;
+use tokio::sync::oneshot;
 
+use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
-use crate::pinger_rpc::registrar_capnp::registrar;
+use crate::pinger_rpc::registrar_capnp::{registrar, registration_callback};
 use crate::types::Result;
 
 pub async fn main(conf: Config) -> Result<()> {
@@ -33,14 +35,15 @@ async fn try_main(conf: Config) -> Result<()> {
 
     let mut req = client.register_request();
 
-    req.get().init_request().set_name("Rust Test");
+    req.get()
+        .init_request()
+        .set_name("Rust Test");
 
-    req.send().promise.await?;
+    // Add the callback
+    let (tx, _rx) = oneshot::channel();
+    let callback: registration_callback::Client = capnp_rpc::new_client(RegistrationCallbackImpl { sender: tx });
+    req.get().set_callback(callback);
 
-
-    // rr.create_request();
-
-
-    // Connect away
+    let _ = req.send().promise.await?;
     Ok(())
 }
