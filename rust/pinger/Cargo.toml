@@ -1,0 +1,19 @@
+[package]
+name = "pinger"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies.pinger_rpc]
+path = "libs/pinger_rpc"
+
+[dependencies]
+capnp = "0.14.5"
+capnp-rpc = "0.14.1"
+logs = "0.5.0"
+env_logger = "0.9.0"
+tokio = { version = "1.16.1", features = ["full"] }
+tokio-util = { version = "0.7.0", features = ["full"] }
+#tokio = { version = "1.16.1", features = ["rt-multi-thread", "net", "macros", "io-util"] }
+futures = "0.3.21"
+crossbeam = "0.8.1"
