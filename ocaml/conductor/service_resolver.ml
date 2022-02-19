@@ -6,7 +6,6 @@ module Log = (val Logs.src_log src: Logs.LOG)
 module Api = Conductor_protocols.Services.MakeRPC(Capnp_rpc_lwt)
 module SP = Conductor_protocols.Services.Make (Capnp.BytesMessage)
 
-
 let make service_name =
   let module Resolver = Api.Service.ServiceResolver in
   Resolver.local
@@ -18,13 +17,13 @@ let make service_name =
         Log.info(fun m -> m"Resolving services for: %s" service_name);
         (* Create the required services, for now, we'll just pass a Pinger to see if things actually work*)
         release_caps ();
-        let _pinger = Pinger.local in
+        let pinger = Pinger.local in
         let response, results = Service.Response.create Results.init_pointer in
-        let svc = Api.Builder.Service.init_root () in
-        Api.Builder.Service.name_set svc "pinger";
-        Log.info(fun m -> m"Name set");
-        Log.info(fun m -> m"Service set");
-        let _ = Results.services_set_list results [svc] in
+        let module SB = Api.Builder.Service in
+        let svcs = Results.services_init results 1 in
+        let svc = Capnp.Array.get svcs 0 in
+        SB.name_set svc "pinger";
+        SB.ping_set svc (Some pinger);
         Service.return response
 
       end

@@ -21,7 +21,6 @@ module Callback = struct
     Params.err_set params msg;
     Capability.call_for_unit_exn t method_id request
 
-
 end
 
 let handle_registration callback ~name =

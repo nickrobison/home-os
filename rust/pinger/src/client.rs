@@ -3,7 +3,7 @@ use std::net::ToSocketAddrs;
 use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
 use crossbeam::channel::bounded;
 use futures::{AsyncReadExt, FutureExt};
-use logs::info;
+use logs::{error, info};
 
 use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
@@ -46,7 +46,36 @@ async fn try_main(conf: Config) -> Result<()> {
 
     let _ = req.send().promise.await?;
 
-    let resp = rx.recv().unwrap();
+    let resp = rx.recv();
+
+    match resp? {
+        Ok(pinger) => {
+            info!("Resolved correctly, yaya for us!");
+
+            for _ in 0..3 {
+                info!("Sending ping and reply");
+                let _ = pinger.ping_request().send().promise;
+                let mut reply_request = pinger.reply_request();
+                reply_request.get()
+                    .set_msg("Hello world");
+                // Ideally these 2 requests would run in parallel
+                let _ = match reply_request.send().promise.await {
+                    Ok(r) => {
+                        let response = r.get()?;
+                        let msg = response.get_response()?;
+                        info!("Received `{}` from service", msg);
+                        Ok(())
+                    }
+                    Err(err) => {
+                        Err(err)
+                    }
+                };
+            }
+        }
+        Err(err) => {
+            error!("Could not get correct services: {}", err);
+        }
+    }
 
 
     Ok(())
