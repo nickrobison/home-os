@@ -2,8 +2,9 @@ use capnp_rpc::pry;
 use crossbeam::channel::Sender;
 use logs::info;
 
-use crate::pinger_rpc::registrar_capnp::registration_callback;
-use crate::pinger_rpc::services_capnp::{ping, service};
+use protocols_rs::protocols::registrar_capnp::registration_callback;
+use protocols_rs::protocols::services_capnp::{ping, service};
+
 use crate::types::Promise;
 
 pub struct RegistrationCallbackImpl {
@@ -41,7 +42,7 @@ impl registration_callback::Server for RegistrationCallbackImpl {
                     channel.send(Result::Err(capnp::Error::failed("Sorry, wrong metric type".to_string())))
                         .map_err(|_| capnp::Error::failed("Unable to send msg".to_string()))
                 }
-            }
+            };
         });
     }
 }

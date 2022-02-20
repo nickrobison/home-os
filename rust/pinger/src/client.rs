@@ -5,9 +5,10 @@ use crossbeam::channel::bounded;
 use futures::{AsyncReadExt, FutureExt};
 use logs::{error, info};
 
+use protocols_rs::protocols::registrar_capnp::{registrar, registration_callback};
+
 use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
-use crate::pinger_rpc::registrar_capnp::{registrar, registration_callback};
 use crate::types::Result;
 
 pub async fn main(conf: Config) -> Result<()> {

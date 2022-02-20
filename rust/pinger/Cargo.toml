@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[dependencies.pinger_rpc]
-path = "libs/pinger_rpc"
+[dependencies.protocols_rs]
+path = "../protocols_rs"
 
 [dependencies]
 capnp = "0.14.5"
