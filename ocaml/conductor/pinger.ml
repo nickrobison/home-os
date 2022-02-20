@@ -4,7 +4,7 @@ open Capnp_rpc_lwt
 let src = Logs.Src.create "pinger" ~doc:"Simple ping service"
 
 module Log = (val Logs.src_log src : Logs.LOG)
-module Api = Conductor_protocols.Services.MakeRPC (Capnp_rpc_lwt)
+module Api = Homeos_protocols.Services.MakeRPC (Capnp_rpc_lwt)
 
 let local =
   let module Ping = Api.Service.Ping in

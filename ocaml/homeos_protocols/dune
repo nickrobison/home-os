@@ -1,0 +1,27 @@
+(subdir
+ protocols
+ (library
+  (name homeos_protocols)
+  (ocamlc_flags :standard -w -55-53)
+  (ocamlopt_flags :standard -w -55-53)
+  (libraries capnp))
+ (rule
+  (targets registration.ml registration.mli)
+  (deps registration.capnp)
+  (action
+   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
+ (rule
+  (targets registrar.ml registrar.mli)
+  (deps registrar.capnp)
+  (action
+   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
+ (rule
+  (targets services.ml services.mli)
+  (deps services.capnp)
+  (action
+   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
+ (rule
+  (targets metrics.ml metrics.mli)
+  (deps metrics.capnp)
+  (action
+   (run capnp compile -o %{bin:capnpc-ocaml} %{deps}))))

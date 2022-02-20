@@ -4,11 +4,10 @@ open Capnp_rpc_lwt
 let src = Logs.Src.create "registrar" ~doc:"Service Registrar"
 
 module Log = (val Logs.src_log src : Logs.LOG)
-module Api = Conductor_protocols.Registrar.MakeRPC (Capnp_rpc_lwt)
-module RP = Conductor_protocols.Registration.Make (Capnp.BytesMessage)
+module Api = Homeos_protocols.Registrar.MakeRPC (Capnp_rpc_lwt)
+module RP = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
 module Callback = struct
-
   let succeed t resolver =
     let open Api.Client.RegistrationCallback.Success in
     let request, params = Capability.Request.create Params.init_pointer in
@@ -20,11 +19,10 @@ module Callback = struct
     let request, params = Capability.Request.create Params.init_pointer in
     Params.err_set params msg;
     Capability.call_for_unit_exn t method_id request
-
 end
 
 let handle_registration callback ~name =
-  Log.info (fun m ->m"Successfully registered %s" name);
+  Log.info (fun m -> m "Successfully registered %s" name);
   (* Create a new service resolver and return it*)
   let resolver = Service_resolver.make name in
   Callback.succeed callback resolver >|= fun () ->

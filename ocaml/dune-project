@@ -9,6 +9,12 @@
 (authors "Nick Robison <nick@nickrobison.com>")
 
 (package
+  (name homesos_protocols)
+  (synopsis "Core HomeOS Capnp protocols")
+  (depends
+    capnp))
+
+(package
   (name conductor)
   (synopsis "Core HomeOS conductor library")
   (depends
