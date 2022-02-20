@@ -1,14 +1,10 @@
-extern crate rpc_lib;
-
-use std::{error, time};
-
 use capnp::serialize;
 use clap::{App, Arg};
 use log::info;
+use protocols_rs::protocols::registration_capnp::registration_request;
+use std::{error, time};
 
 use crate::config::Config;
-use crate::rpc_lib::registration_capnp::registration_request;
-
 
 mod client;
 mod config;
