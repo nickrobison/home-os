@@ -23,8 +23,9 @@
     capnp-rpc-lwt
     logs
     fmt
-    irmin
-    ppx_irmin))
+    irmin-git
+    ppx_irmin
+uuidm))
 
 
 (package

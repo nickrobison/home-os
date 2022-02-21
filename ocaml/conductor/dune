@@ -2,4 +2,5 @@
  (name conductor)
  (ocamlc_flags :standard -w -55-53)
  (ocamlopt_flags :standard -w -55-53)
- (libraries capnp capnp-rpc-lwt logs lwt homeos_protocols))
+ (libraries capnp capnp-rpc-lwt logs lwt homeos_protocols irmin irmin-unix uuidm)
+ (preprocess (pps ppx_irmin)))
