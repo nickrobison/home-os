@@ -1,20 +1,66 @@
-type registered_service = { typ : string } [@@deriving irmin]
+type registered_service = { typ : string } [@@deriving irmin, eq, ord, show]
+
+type registration_status = Pending | Approved | Rejected
+[@@deriving irmin, eq, ord, show]
+
+type error = [ `Parse_error of string ] [@@deriving show, eq, ord]
 
 type registered_application = {
   id : string;
   name : string;
+  status : registration_status;
   consumes : registered_service list;
   produces : registered_service list;
   hash : string;
 }
-[@@deriving irmin]
+[@@deriving irmin, eq, ord, show]
+
+module RegistrationStatus = struct
+  type t = registration_status
+
+  let t_to_irmin = function
+    | Pending -> "pending"
+    | Approved -> "approved"
+    | Rejected -> "rejected"
+
+  let t_of_irmin = function
+    | "pending" -> Ok Pending
+    | "approved" -> Ok Approved
+    | "rejected" -> Ok Rejected
+    | str -> Error (`Parse_error (Format.sprintf "Unknown status: %s" str))
+end
 
 module RegisteredApplication : sig
   type t = registered_application [@@deriving irmin]
 
+  val t_to_irmin : t -> Irmin.Contents.Json_value.t
+  val t_of_irmin : Irmin.Contents.Json_value.t -> (t, [> error ]) result
   val merge : t option Irmin.Merge.t
 end = struct
   type t = registered_application [@@deriving irmin]
 
   let merge = Irmin.Merge.(option (idempotent t))
+
+  let t_to_irmin t =
+    `O
+      [
+        ("id", `String t.id);
+        ("name", `String t.name);
+        ("status", `String (RegistrationStatus.t_to_irmin t.status));
+      ]
+
+  let ( let* ) = Result.bind
+
+  let member f key json =
+    try Ok (f (Ezjsonm.find json key)) with
+    | Ezjsonm.Parse_error (_, msg) -> Error (`Parse_error msg)
+    | Not_found -> Error (`Parse_error "Cannot find key")
+
+  let t_of_irmin json =
+    let open Ezjsonm in
+    let* id = member get_string [ "id" ] json in
+    let* name = member get_string [ "name" ] json in
+    let* status_str = member get_string [ "status" ] json in
+    let* status = RegistrationStatus.t_of_irmin status_str in
+    Ok { id; name; consumes = []; produces = []; hash = ""; status }
 end

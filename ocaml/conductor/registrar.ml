@@ -6,7 +6,7 @@ let src = Logs.Src.create "registrar" ~doc:"Service Registrar"
 module Log = (val Logs.src_log src : Logs.LOG)
 module Api = Homeos_protocols.Registrar.MakeRPC (Capnp_rpc_lwt)
 module RP = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
-module Store = Irmin_unix.Git.FS.KV (Models.RegisteredApplication)
+module Store = Irmin_unix.Git.FS.KV (Irmin.Contents.Json_value)
 module DB = Db_irmin.Make (Store)
 
 module Callback = struct

@@ -18,13 +18,17 @@
   (name conductor)
   (synopsis "Core HomeOS conductor library")
   (depends
+    (ocaml (>= 4.12))
     (alcotest :with-test)
+    (alcotest-lwt :with-test)
     (dune (> 1.5))
     capnp-rpc-lwt
     logs
     fmt
     irmin-git
     ppx_irmin
+    ppx_deriving
+    ezjsonm
 uuidm))
 
 
