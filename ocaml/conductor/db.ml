@@ -14,5 +14,12 @@ module type S = sig
     id:string ->
     (Models.registered_application, [> read_error ]) result Lwt.t
 
+  val set_registration_status :
+    t ->
+    user:User.t option ->
+    Models.registration_status ->
+    id:string ->
+    (unit, [> read_error ]) result Lwt.t
+
   val create : config -> t Lwt.t
 end

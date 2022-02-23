@@ -39,6 +39,26 @@ module Make (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t) 
     | Ok v -> Models.RegisteredApplication.t_of_irmin v
     | Error e -> Error e
 
+  let set_registration_status t ~user:_ status ~id =
+    let info fmt =
+      Irmin_unix.info ~author:"System <homeos@nickrobison.com>" fmt
+    in
+    let* maybe_val = Store.find t [ app_prefix; id ] in
+    match maybe_val with
+    | None -> Lwt.return_error (`Not_found "nope, not there")
+    | Some v -> (
+        (*Gross, gross, gross*)
+        let v = Models.RegisteredApplication.t_of_irmin v in
+        match v with
+        | Error e -> Lwt.return_error e
+        | Ok v ->
+            let+ () =
+              Store.set_exn t [ app_prefix; id ]
+                (Models.RegisteredApplication.t_to_irmin { v with status })
+                ~info:(info "Updating")
+            in
+            Ok ())
+
   let create config =
     let* repo = Store.Repo.v config in
     Store.master repo

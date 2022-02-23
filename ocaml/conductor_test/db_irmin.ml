@@ -6,6 +6,10 @@ let app_test =
   Alcotest.testable Conductor__.Models.pp_registered_application (fun l r ->
       Conductor__.Models.equal_registered_application l r)
 
+let status_test =
+  Alcotest.testable Conductor__.Models.pp_registration_status
+    Conductor__.Models.equal_registration_status
+
 let config () = DB.create (Irmin_mem.config ())
 let ok _ () = Lwt.return (Alcotest.(check string) "hello" "hello" "hello")
 
@@ -30,11 +34,70 @@ let simple_get _ () =
       | Ok v -> Alcotest.(check app_test) "Should be equal" app v
       | Error e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
 
+let update_status _ () =
+  let app : Conductor__.Models.registered_application =
+    {
+      id = "test";
+      name = "hello";
+      status = Pending;
+      consumes = [];
+      produces = [];
+      hash = "";
+    }
+  in
+  let* store = config () in
+  let* res = DB.create_registration store ~app in
+  match res with
+  | Error _ -> Alcotest.fail "Unable to create record"
+  | Ok () -> (
+      let* res =
+        DB.set_registration_status store ~user:None Approved ~id:"test"
+      in
+      match res with
+      | Error e ->
+          Alcotest.failf "Unable to update record: %a" DB.pp_read_error e
+      | Ok () -> (
+          let+ v = DB.get_registration store ~id:"test" in
+          match v with
+          | Error e ->
+              Alcotest.failf "Unable to get record: %a" DB.pp_read_error e
+          | Ok v ->
+              Alcotest.(check status_test) "Should be equal" Approved v.status))
+
+let get_unknown _ () =
+  let* store = config () in
+  let+ res = DB.get_registration store ~id:"missing" in
+  match res with
+  | Ok _ -> Alcotest.fail "Should not find record"
+  | Error e -> (
+      match e with
+      | `Not_found msg ->
+          Alcotest.(check string)
+            "Should have correct error" "Cannot find key" msg
+      | e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
+
+let update_unknown _ () =
+  let* store = config () in
+  let+ res =
+    DB.set_registration_status store ~user:None Approved ~id:"missing"
+  in
+  match res with
+  | Ok _ -> Alcotest.fail "Should not find record"
+  | Error e -> (
+      match e with
+      | `Not_found msg ->
+          Alcotest.(check string)
+            "Should have correct error" "nope, not there" msg
+      | e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
+
 let test_cases =
   [
     ( "db_irmin",
       [
         Alcotest_lwt.test_case "Success" `Quick ok;
         Alcotest_lwt.test_case "Simple get/set" `Quick simple_get;
+        Alcotest_lwt.test_case "Update status" `Quick update_status;
+        Alcotest_lwt.test_case "Get unknown id" `Quick get_unknown;
+        Alcotest_lwt.test_case "Update unknown record" `Quick update_unknown;
       ] );
   ]
