@@ -23,3 +23,8 @@ interface ServiceResolver {
 interface ServiceManager {
   list @0 () -> (services :List(Service));
 }
+
+enum ServiceType {
+  ping @0;
+  metrics @1;
+}

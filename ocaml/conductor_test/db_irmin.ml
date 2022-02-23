@@ -6,6 +6,7 @@ end
 
 module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
 module DB = Conductor__.Db_irmin.Make (Store) (Info)
+module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
 let user = Conductor__.User.system_user
 
@@ -18,12 +19,25 @@ let status_test =
     Conductor__.Models.equal_registration_status
 
 let config () = DB.create (Irmin_mem.config ())
-let ok _ () = Lwt.return (Alcotest.(check string) "hello" "hello" "hello")
+
+let details =
+  let open Reg.Builder.RegistrationRequest in
+  let d = init_root () in
+  name_set d "Test request";
+  description_set d "Test Description";
+  d
+
+let app : Conductor__.Models.application_record =
+  {
+    id = "test";
+    name = "hello";
+    status = Pending;
+    hash =
+      "e0978a63a2dd6b07ebda40d54bfcc09c7e2e7a85993e746079ad15fa6a704471081804b230cc96d15bdfdb3de9c6c8fad85bb75709d38bb14fac4aad8354aca4";
+    details;
+  }
 
 let simple_get _ () =
-  let app : Conductor__.Models.application_record =
-    { id = "test"; name = "hello"; status = Pending; hash = "" }
-  in
   let* store = config () in
   let* res = DB.create_registration store ~app in
   match res with
@@ -35,9 +49,6 @@ let simple_get _ () =
       | Error e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
 
 let update_status _ () =
-  let app : Conductor__.Models.application_record =
-    { id = "test"; name = "hello"; status = Pending; hash = "" }
-  in
   let* store = config () in
   let* res = DB.create_registration store ~app in
   match res with
@@ -83,7 +94,6 @@ let test_cases =
   [
     ( "db_irmin",
       [
-        Alcotest_lwt.test_case "Success" `Quick ok;
         Alcotest_lwt.test_case "Simple get/set" `Quick simple_get;
         Alcotest_lwt.test_case "Update status" `Quick update_status;
         Alcotest_lwt.test_case "Get unknown id" `Quick get_unknown;
