@@ -7,12 +7,10 @@ module type S = sig
   [@@deriving show, eq, ord]
 
   val create_registration :
-    t -> app:Models.registered_application -> (unit, error) result Lwt.t
+    t -> app:Models.application_record -> (unit, error) result Lwt.t
 
   val get_registration :
-    t ->
-    id:string ->
-    (Models.registered_application, [> read_error ]) result Lwt.t
+    t -> id:string -> (Models.application_record, [> read_error ]) result Lwt.t
 
   val set_registration_status :
     t ->

@@ -3,8 +3,8 @@ module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
 module DB = Conductor__.Db_irmin.Make (Store)
 
 let app_test =
-  Alcotest.testable Conductor__.Models.pp_registered_application (fun l r ->
-      Conductor__.Models.equal_registered_application l r)
+  Alcotest.testable Conductor__.Models.pp_application_record
+    Conductor__.Models.equal_application_record
 
 let status_test =
   Alcotest.testable Conductor__.Models.pp_registration_status
@@ -14,15 +14,8 @@ let config () = DB.create (Irmin_mem.config ())
 let ok _ () = Lwt.return (Alcotest.(check string) "hello" "hello" "hello")
 
 let simple_get _ () =
-  let app : Conductor__.Models.registered_application =
-    {
-      id = "test";
-      name = "hello";
-      status = Pending;
-      consumes = [];
-      produces = [];
-      hash = "";
-    }
+  let app : Conductor__.Models.application_record =
+    { id = "test"; name = "hello"; status = Pending; hash = "" }
   in
   let* store = config () in
   let* res = DB.create_registration store ~app in
@@ -35,15 +28,8 @@ let simple_get _ () =
       | Error e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
 
 let update_status _ () =
-  let app : Conductor__.Models.registered_application =
-    {
-      id = "test";
-      name = "hello";
-      status = Pending;
-      consumes = [];
-      produces = [];
-      hash = "";
-    }
+  let app : Conductor__.Models.application_record =
+    { id = "test"; name = "hello"; status = Pending; hash = "" }
   in
   let* store = config () in
   let* res = DB.create_registration store ~app in
