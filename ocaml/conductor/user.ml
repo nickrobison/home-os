@@ -13,3 +13,9 @@ module Id = struct
 end
 
 type t = { id : Id.t; username : string; email : string } [@@deriving show, eq]
+
+let system_user =
+  let id = Uuidm.of_string "00000000-0000-0000-0000-000000000000" in
+  match id with
+  | None -> failwith "Cannot parse UUID"
+  | Some id -> { id; username = "System User"; email = "homeos@homeoslocal" }

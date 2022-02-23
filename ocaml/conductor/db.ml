@@ -1,3 +1,9 @@
+(** Simple abstraction layer over the `info` command for Irmin, not sure why there isn't one already, but this works with 2.x*)
+module type Info = sig
+  val info :
+    ?author:string -> ('a, Format.formatter, unit, Irmin.Info.f) format4 -> 'a
+end
+
 module type S = sig
   type config
   type t
@@ -14,7 +20,7 @@ module type S = sig
 
   val set_registration_status :
     t ->
-    user:User.t option ->
+    user:User.t ->
     Models.registration_status ->
     id:string ->
     (unit, [> read_error ]) result Lwt.t

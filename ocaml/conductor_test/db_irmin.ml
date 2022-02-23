@@ -1,6 +1,13 @@
 open Lwt.Syntax
+
+module Info = struct
+  let info = Irmin_unix.info
+end
+
 module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
-module DB = Conductor__.Db_irmin.Make (Store)
+module DB = Conductor__.Db_irmin.Make (Store) (Info)
+
+let user = Conductor__.User.system_user
 
 let app_test =
   Alcotest.testable Conductor__.Models.pp_application_record
@@ -36,9 +43,7 @@ let update_status _ () =
   match res with
   | Error _ -> Alcotest.fail "Unable to create record"
   | Ok () -> (
-      let* res =
-        DB.set_registration_status store ~user:None Approved ~id:"test"
-      in
+      let* res = DB.set_registration_status store ~user Approved ~id:"test" in
       match res with
       | Error e ->
           Alcotest.failf "Unable to update record: %a" DB.pp_read_error e
@@ -64,9 +69,7 @@ let get_unknown _ () =
 
 let update_unknown _ () =
   let* store = config () in
-  let+ res =
-    DB.set_registration_status store ~user:None Approved ~id:"missing"
-  in
+  let+ res = DB.set_registration_status store ~user Approved ~id:"missing" in
   match res with
   | Ok _ -> Alcotest.fail "Should not find record"
   | Error e -> (

@@ -1,7 +1,9 @@
 open Lwt.Syntax
 
-module Make (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t) :
-  Db.S with type t = Store.t and type config = Irmin.config = struct
+module Make
+    (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t)
+    (I : Db.Info) : Db.S with type t = Store.t and type config = Irmin.config =
+struct
   type t = Store.t
   type config = Irmin.config
   type error = Store.write_error
@@ -17,11 +19,11 @@ module Make (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t) 
   let app_prefix = "application"
   let _service_prefix = "services"
 
-  (* This should NOT be Unix focused, but I can't seem to figure out the appropriate type*)
+  let info ?(user = User.system_user) fmt =
+    let author = Format.sprintf "%s <%s>" user.username user.email in
+    I.info ~author fmt
+
   let create_registration t ~app =
-    let info fmt =
-      Irmin_unix.info ~author:"System <homeos@nickrobison.com>" fmt
-    in
     let value = Models.ApplicationRecord.t_to_irmin app in
     Log.info (fun m ->
         m "Persisting app registration: %a" Models.pp_application_record app);
@@ -43,18 +45,15 @@ module Make (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t) 
     | Ok v -> Models.ApplicationRecord.t_of_irmin ~id v
     | Error e -> Error e
 
-  let set_registration_status t ~user:_ status ~id =
+  let set_registration_status t ~user status ~id =
     let status_key = [ app_prefix; id; "status" ] in
-    let info fmt =
-      Irmin_unix.info ~author:"System <homeos@nickrobison.com>" fmt
-    in
     let* maybe_value = Store.find t status_key in
     match maybe_value with
     | None -> Lwt.return_error (`Not_found "nope, not there")
     | Some _ ->
         let value = `String (Models.RegistrationStatus.t_to_irmin status) in
         let+ () =
-          Store.set_exn t status_key value ~info:(info "Updating status")
+          Store.set_exn t status_key value ~info:(info ~user "Updating status")
         in
         Ok ()
 

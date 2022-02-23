@@ -6,3 +6,5 @@ module Id : sig
 end
 
 type t = { id : Id.t; username : string; email : string } [@@deriving show, eq]
+
+val system_user : t
