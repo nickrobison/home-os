@@ -46,6 +46,7 @@ async fn try_main(conf: Config) -> Result<()> {
 
     r2.set_name("Rust Test");
     r2.set_callback(callback);
+    r2.set_bootstrap_key("hello");
 
     let _ = req.send().promise.await?;
 

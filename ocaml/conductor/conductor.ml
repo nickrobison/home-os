@@ -9,13 +9,13 @@ struct
   module DB = Db_irmin.Make (Store) (I)
   module Registrar = Registrar.Make (DB)
 
-  type db = DB.t
-  type t = { db : DB.t }
+  type config = { bootstrap_key : string option; db_config : DB.config }
+  type t = { db : DB.t; config : config }
 
-  let make () =
+  let make config =
     (*Should not be hard coded here*)
-    let+ db = DB.create (Irmin_git.config ~bare:true "/tmp/conductor-test") in
-    { db }
+    let+ db = DB.create config.db_config in
+    { db; config }
 
-  let registrar t = Registrar.local t.db
+  let registrar t = Registrar.local t.config.bootstrap_key t.db
 end

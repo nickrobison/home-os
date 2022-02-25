@@ -19,6 +19,7 @@ struct RegistrationRequest {
     consumes @2 :List(ServiceRequest);
     produces @3 :List(Services.Service);
     callback @4 :RegistrationCallback;
+    bootstrapKey @5 :Text;
 }
 
 struct RegistrationResponse {

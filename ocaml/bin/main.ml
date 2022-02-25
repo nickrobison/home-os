@@ -25,7 +25,9 @@ let start_server =
          listen_address
      in
      let service_id = Capnp_rpc_net.Restorer.Id.public "" in
-     Conductor.make () >>= fun conductor ->
+     let db_config = Irmin_git.config ~bare:true "/tmp/conductor" in
+     Conductor.make { bootstrap_key = Some "hello"; db_config }
+     >>= fun conductor ->
      let restore =
        Capnp_rpc_net.Restorer.single service_id (Conductor.registrar conductor)
      in
