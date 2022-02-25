@@ -5,18 +5,18 @@ module Info = struct
 end
 
 module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
-module DB = Conductor__.Db_irmin.Make (Store) (Info)
+module DB = Conductor.Db_irmin.Make (Store) (Info)
 module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
 let user = Conductor__.User.system_user
 
 let app_test =
   Alcotest.testable Conductor__.Models.pp_application_record
-    Conductor__.Models.equal_application_record
+    Conductor.Models.equal_application_record
 
 let status_test =
-  Alcotest.testable Conductor__.Models.pp_registration_status
-    Conductor__.Models.equal_registration_status
+  Alcotest.testable Conductor.Models.pp_registration_status
+    Conductor.Models.equal_registration_status
 
 let config () = DB.create (Irmin_mem.config ())
 
@@ -34,7 +34,7 @@ let uuid_gen_exn str =
 let test_id = uuid_gen_exn "35acc634-6f7b-4c1e-95f6-e55b19cc189a"
 let missing_id = uuid_gen_exn "11acc634-6f7b-4c1e-95f6-e55b19cc189a"
 
-let app : Conductor__.Models.application_record =
+let app : Conductor.Models.application_record =
   {
     id = test_id;
     name = "Test request";

@@ -1,8 +1,14 @@
 open Lwt.Infix
 
-let src = Logs.Src.create "Conductor" ~doc:"HomeOS Conductor"
+let src = Logs.Src.create "Conductor(Main)" ~doc:"HomeOS Conductor (Main)"
+
+module Info = struct
+  let info = Irmin_unix.info
+end
 
 module Log = (val Logs.src_log src : Logs.LOG)
+module Store = Irmin_unix.Git.FS.KV (Irmin.Contents.Json_value)
+module Conductor = Conductor.Make (Store) (Info)
 
 let () =
   Logs.set_level (Some Logs.Info);
@@ -19,8 +25,9 @@ let start_server =
          listen_address
      in
      let service_id = Capnp_rpc_net.Restorer.Id.public "" in
+     Conductor.make () >>= fun conductor ->
      let restore =
-       Capnp_rpc_net.Restorer.single service_id Conductor__.Registrar.local
+       Capnp_rpc_net.Restorer.single service_id (Conductor.registrar conductor)
      in
      Capnp_rpc_unix.serve config ~restore >>= fun vat ->
      let uri = Capnp_rpc_unix.Vat.sturdy_uri vat service_id in
