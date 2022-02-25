@@ -27,10 +27,17 @@ let details =
   description_set d "Test Description";
   d
 
+let uuid_gen_exn str =
+  match Uuidm.of_string str with Some v -> v | None -> failwith "Invalid uuid"
+(*Should never happen*)
+
+let test_id = uuid_gen_exn "35acc634-6f7b-4c1e-95f6-e55b19cc189a"
+let missing_id = uuid_gen_exn "11acc634-6f7b-4c1e-95f6-e55b19cc189a"
+
 let app : Conductor__.Models.application_record =
   {
-    id = "test";
-    name = "hello";
+    id = test_id;
+    name = "Test request";
     status = Pending;
     hash =
       "e0978a63a2dd6b07ebda40d54bfcc09c7e2e7a85993e746079ad15fa6a704471081804b230cc96d15bdfdb3de9c6c8fad85bb75709d38bb14fac4aad8354aca4";
@@ -39,36 +46,42 @@ let app : Conductor__.Models.application_record =
 
 let simple_get _ () =
   let* store = config () in
-  let* res = DB.create_registration store ~app in
+  let* res = DB.create_registration store ~app:details in
   match res with
   | Error _ -> Alcotest.fail "bad, bad, bad"
-  | Ok () -> (
-      let+ v = DB.get_registration store ~id:app.id in
+  | Ok id -> (
+      let+ v = DB.get_registration store ~id in
       match v with
-      | Ok v -> Alcotest.(check app_test) "Should be equal" app v
+      | Ok v -> Alcotest.(check app_test) "Should be equal" { app with id } v
       | Error e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
 
 let update_status _ () =
   let* store = config () in
-  let* res = DB.create_registration store ~app in
+  let* res = DB.create_registration store ~app:details in
   match res with
   | Error _ -> Alcotest.fail "Unable to create record"
-  | Ok () -> (
-      let* res = DB.set_registration_status store ~user Approved ~id:"test" in
+  | Ok id -> (
+      let* res = DB.set_registration_status store ~user Approved ~id in
       match res with
       | Error e ->
           Alcotest.failf "Unable to update record: %a" DB.pp_read_error e
       | Ok () -> (
-          let+ v = DB.get_registration store ~id:"test" in
+          let+ v = DB.get_registration store ~id in
           match v with
           | Error e ->
               Alcotest.failf "Unable to get record: %a" DB.pp_read_error e
           | Ok v ->
-              Alcotest.(check status_test) "Should be equal" Approved v.status))
+              Alcotest.(check status_test) "Should be equal" Approved v.status;
+              let description =
+                Reg.Builder.RegistrationRequest.description_get v.details
+              in
+              Alcotest.(check string)
+                "Should have correct description" "Test Description" description
+          ))
 
 let get_unknown _ () =
   let* store = config () in
-  let+ res = DB.get_registration store ~id:"missing" in
+  let+ res = DB.get_registration store ~id:missing_id in
   match res with
   | Ok _ -> Alcotest.fail "Should not find record"
   | Error e -> (
@@ -80,7 +93,7 @@ let get_unknown _ () =
 
 let update_unknown _ () =
   let* store = config () in
-  let+ res = DB.set_registration_status store ~user Approved ~id:"missing" in
+  let+ res = DB.set_registration_status store ~user Approved ~id:missing_id in
   match res with
   | Ok _ -> Alcotest.fail "Should not find record"
   | Error e -> (

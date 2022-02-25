@@ -1,3 +1,5 @@
+module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
+
 (** Simple abstraction layer over the `info` command for Irmin, not sure why there isn't one already, but this works with 2.x*)
 module type Info = sig
   val info :
@@ -13,16 +15,16 @@ module type S = sig
   [@@deriving show, eq, ord]
 
   val create_registration :
-    t -> app:Models.application_record -> (unit, error) result Lwt.t
+    t -> app:Reg.Builder.RegistrationRequest.t -> (Uuidm.t, error) result Lwt.t
 
   val get_registration :
-    t -> id:string -> (Models.application_record, [> read_error ]) result Lwt.t
+    t -> id:Uuidm.t -> (Models.application_record, [> read_error ]) result Lwt.t
 
   val set_registration_status :
     t ->
     user:User.t ->
     Models.registration_status ->
-    id:string ->
+    id:Uuidm.t ->
     (unit, [> read_error ]) result Lwt.t
 
   val create : config -> t Lwt.t

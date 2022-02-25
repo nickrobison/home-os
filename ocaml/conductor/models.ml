@@ -12,11 +12,12 @@ type error = [ `Parse_error of string | `Deserialization_error of capnp_error ]
 [@@deriving show, eq, ord]
 
 type application_record = {
-  id : string;
+  id : Uuidm.t;
   name : string;
   status : registration_status;
   hash : string;
   details : R.Builder.RegistrationRequest.t; [@opaque] [@equal fun _a _b -> true]
+      (* We're disabling this equality check because we rely on the [hash] value to determine equality. It's not great, but it should work*)
 }
 [@@deriving eq, show]
 
@@ -42,6 +43,8 @@ module ApplicationRecord : sig
 
   val t_of_irmin :
     id:string -> Irmin.Contents.Json_value.t -> (t, [> error ]) result
+
+  val make : R.Builder.RegistrationRequest.t -> t
 end = struct
   type t = application_record
 
@@ -55,14 +58,20 @@ end = struct
     let ctx = H.feed_string ctx str in
     H.to_hex (H.get ctx)
 
+  let make request =
+    let name = R.Builder.RegistrationRequest.name_get request in
+    let serialized = capnp_to_str request in
+    let id = Uuidm.v `V4 in
+    let hashed = hash serialized in
+    { id; name; status = Pending; hash = hashed; details = request }
+
   let t_to_irmin t =
     let serialized = capnp_to_str t.details in
-    let hashed = hash serialized in
     `O
       [
         ("name", `String t.name);
         ("status", `String (RegistrationStatus.t_to_irmin t.status));
-        ("hash", `String hashed);
+        ("hash", `String t.hash);
         ("details", `String serialized);
       ]
 
@@ -81,12 +90,16 @@ end = struct
     | Error e -> Error (`Deserialization_error e)
 
   let t_of_irmin ~id json =
-    let open Ezjsonm in
-    let* name = member get_string [ "name" ] json in
-    let* status_str = member get_string [ "status" ] json in
-    let* details_str = member get_string [ "details" ] json in
-    let* hash = member get_string [ "hash" ] json in
-    let* details = capnp_of_str details_str in
-    let* status = RegistrationStatus.t_of_irmin status_str in
-    Ok { id; name; hash; status; details }
+    let uuid = Uuidm.of_string id in
+    match uuid with
+    | None -> Error (`Parse_error "bad id format")
+    | Some id ->
+        let open Ezjsonm in
+        let* name = member get_string [ "name" ] json in
+        let* status_str = member get_string [ "status" ] json in
+        let* details_str = member get_string [ "details" ] json in
+        let* hash = member get_string [ "hash" ] json in
+        let* details = capnp_of_str details_str in
+        let* status = RegistrationStatus.t_of_irmin status_str in
+        Ok { id; name; hash; status; details }
 end

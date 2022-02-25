@@ -15,6 +15,7 @@ struct
 
   module Log = (val Logs.src_log src : Logs.LOG)
   module Proj = Irmin.Json_tree (Store)
+  module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
   let app_prefix = "application"
   let _service_prefix = "services"
@@ -24,13 +25,16 @@ struct
     I.info ~author fmt
 
   let create_registration t ~app =
-    let value = Models.ApplicationRecord.t_to_irmin app in
+    let value = Models.ApplicationRecord.make app in
+    let value' = Models.ApplicationRecord.t_to_irmin value in
     Log.info (fun m ->
-        m "Persisting app registration: %a" Models.pp_application_record app);
+        m "Persisting app registration: %a" Models.pp_application_record value);
     let+ () =
-      Proj.set t [ app_prefix; app.id ] value ~info:(info "First commit")
+      Proj.set t
+        [ app_prefix; Uuidm.to_string value.id ]
+        value' ~info:(info "First commit")
     in
-    Ok ()
+    Ok value.id
 
   let safe_get t id =
     Lwt.catch
@@ -40,12 +44,14 @@ struct
       (fun _ -> Lwt.return_error (`Not_found "Cannot find key"))
 
   let get_registration t ~id =
+    let id = Uuidm.to_string id in
     let+ v = safe_get t id in
     match v with
     | Ok v -> Models.ApplicationRecord.t_of_irmin ~id v
     | Error e -> Error e
 
   let set_registration_status t ~user status ~id =
+    let id = Uuidm.to_string id in
     let status_key = [ app_prefix; id; "status" ] in
     let* maybe_value = Store.find t status_key in
     match maybe_value with
