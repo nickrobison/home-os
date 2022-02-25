@@ -2,7 +2,7 @@ use capnp_rpc::pry;
 use crossbeam::channel::Sender;
 use logs::info;
 
-use protocols_rs::protocols::registrar_capnp::registration_callback;
+use protocols_rs::protocols::registration_capnp::registration_callback;
 use protocols_rs::protocols::services_capnp::{ping, service};
 
 use crate::types::Promise;

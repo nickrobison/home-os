@@ -5,7 +5,8 @@ use crossbeam::channel::bounded;
 use futures::{AsyncReadExt, FutureExt};
 use logs::{error, info};
 
-use protocols_rs::protocols::registrar_capnp::{registrar, registration_callback};
+use protocols_rs::protocols::registrar_capnp::registrar;
+use protocols_rs::protocols::registration_capnp::registration_callback;
 
 use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
@@ -36,14 +37,15 @@ async fn try_main(conf: Config) -> Result<()> {
 
     let mut req = client.register_request();
 
-    req.get()
-        .init_request()
-        .set_name("Rust Test");
-
     // Add the callback
     let (tx, rx) = bounded(1);
     let callback: registration_callback::Client = capnp_rpc::new_client(RegistrationCallbackImpl { sender: tx });
-    req.get().set_callback(callback);
+
+    let mut r2 = req.get()
+        .init_request();
+
+    r2.set_name("Rust Test");
+    r2.set_callback(callback);
 
     let _ = req.send().promise.await?;
 

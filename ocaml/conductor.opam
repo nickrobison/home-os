@@ -15,9 +15,10 @@ depends: [
   "logs"
   "fmt"
   "irmin-git"
-  "ppx_irmin"
   "ppx_deriving"
+  "ppx_import"
   "ezjsonm"
+  "digestif"
   "uuidm"
   "odoc" {with-doc}
 ]
