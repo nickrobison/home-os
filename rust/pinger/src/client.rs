@@ -1,13 +1,15 @@
 use std::net::ToSocketAddrs;
 
 use capnp_rpc::{rpc_twoparty_capnp, RpcSystem, twoparty};
-use crossbeam::channel::bounded;
 use futures::{AsyncReadExt, FutureExt};
 use logs::{error, info};
+use tokio::sync::mpsc;
+
+use protocols_rs::protocols::registrar_capnp::registrar;
+use protocols_rs::protocols::registration_capnp::registration_callback;
 
 use crate::callback::RegistrationCallbackImpl;
 use crate::Config;
-use crate::pinger_rpc::registrar_capnp::{registrar, registration_callback};
 use crate::types::Result;
 
 pub async fn main(conf: Config) -> Result<()> {
@@ -35,20 +37,24 @@ async fn try_main(conf: Config) -> Result<()> {
 
     let mut req = client.register_request();
 
-    req.get()
-        .init_request()
-        .set_name("Rust Test");
-
     // Add the callback
-    let (tx, rx) = bounded(1);
+    let (tx, mut rx) = mpsc::channel(1);
     let callback: registration_callback::Client = capnp_rpc::new_client(RegistrationCallbackImpl { sender: tx });
-    req.get().set_callback(callback);
 
+    let mut r2 = req.get()
+        .init_request();
+
+    r2.set_name("Rust Test");
+    r2.set_callback(callback);
+    // r2.set_bootstrap_key("hello");
+
+    info!("Waiting for response");
     let _ = req.send().promise.await?;
+    info!("Registration request submitted");
+    let resp = rx.recv().await;
+    info!("Response received");
 
-    let resp = rx.recv();
-
-    match resp? {
+    match resp.unwrap() {
         Ok(pinger) => {
             info!("Resolved correctly, yaya for us!");
 

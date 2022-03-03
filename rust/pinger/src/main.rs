@@ -1,5 +1,3 @@
-extern crate pinger_rpc;
-
 use logs::info;
 
 use types::Result;

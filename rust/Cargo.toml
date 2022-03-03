@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-  "bonsai",
-  "pinger"
+  "pinger",
+  "protocols_rs"
 ]

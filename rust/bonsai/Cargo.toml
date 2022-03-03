@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Nick Robison <nick@nickrobison.com>"]
 edition = "2018"
 
-[dependencies.rpc_lib]
-path = "libs/rpc_lib"
+[dependencies.protocols_rs]
+path = "../protocols_rs"
 
 [dependencies]
 capnp = "0.13"

@@ -6,5 +6,7 @@ fn main() {
         .file("protocols/registration.capnp")
         .file("protocols/services.capnp")
         .file("protocols/metrics.capnp")
-        .run().expect("schema compiler command");
+        .default_parent_module(vec!["protocols".into()])
+        .output_path("src")
+        .run().expect("Capnp compilation failed");
 }
