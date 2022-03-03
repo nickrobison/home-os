@@ -16,4 +16,3 @@ tokio = { version = "1.16.1", features = ["full"] }
 tokio-util = { version = "0.7.0", features = ["full"] }
 #tokio = { version = "1.16.1", features = ["rt-multi-thread", "net", "macros", "io-util"] }
 futures = "0.3.21"
-crossbeam = "0.8.1"

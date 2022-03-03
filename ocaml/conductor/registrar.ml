@@ -10,7 +10,7 @@ module Make (DB : Db.S) = struct
   module Resolver = Service_resolver.Make (DB)
 
   module Callback = struct
-    let succeed t resolver =
+    let succeed t ~resolver =
       let open RegistrationApi.Client.RegistrationCallback.Success in
       let request, params = Capability.Request.create Params.init_pointer in
       Params.resolver_set params (Some resolver);
@@ -21,23 +21,26 @@ module Make (DB : Db.S) = struct
       let open RegistrationApi.Client.RegistrationCallback.Failure in
       let request, params = Capability.Request.create Params.init_pointer in
       Params.err_set params msg;
-      Capability.call_for_unit_exn t method_id request >>= fun () ->
-      Log.info (fun m -> m "Finished calling callback");
-      Lwt.return_unit
+      Capability.call_for_unit_exn t method_id request
   end
 
   let rpc_fail msg = `Capnp (`Exception (Capnp_rpc.Exception.v msg))
 
-  let approve_service db id callback () =
+  let approve_service db id () =
     let module R = RegistrationApi.Reader.RegistrationRequest in
     DB.get_registration db ~id >>= function
     | Error e ->
         Log.err (fun m -> m "Unable to get registration: %a" DB.pp_read_error e);
         Lwt.return_unit
-    | Ok _registration ->
-        Log.info (fun m -> m "I have a callback, replying");
-        let resolver = Resolver.make id in
-        Callback.succeed callback resolver
+    | Ok registration -> (
+        match R.callback_get registration.details with
+        | None -> Lwt.return_unit
+        | Some callback ->
+            Log.info (fun m -> m "I have a callback, replying");
+            let resolver = Resolver.make id in
+            Callback.succeed callback ~resolver)
+
+  let wakeup : unit Lwt.t option ref = ref None
 
   (** Register application for later approval*)
   let handle_registration ~db ~request ~name () =
@@ -48,9 +51,10 @@ module Make (DB : Db.S) = struct
         Log.info (fun m ->
             m "Successfully registered service: `%s` with id: %a" name Uuidm.pp
               id);
+        (* This is hacky, but we'll just wait for 3 seconds and then approve async like*)
+        Log.warn (fun m -> m "Waiting 3 seconds and then auto approving");
+        wakeup := Some (Lwt.bind (Lwt_unix.sleep 3.) (approve_service db id));
         Lwt.return_ok (Service.Response.create_empty ())
-
-  let wakeup : unit Lwt.t option ref = ref None
 
   (** Register and immediately approve*)
   let handle_boostrap ~db ~request ~name callback () =
@@ -62,13 +66,10 @@ module Make (DB : Db.S) = struct
         | Error _e -> Lwt.return_error (rpc_fail "Unable to approve service")
         | Ok () ->
             Log.info (fun m ->
-                m "Successfully registered service: `%s` with id: %a" name
+                m "Successfully bootstrapped service: `%s` with id: %a" name
                   Uuidm.pp id);
-            (* This is hacky, but we'll just wait for 3 seconds and then approve async like*)
-            Log.warn (fun m -> m "Waiting 3 seconds and then auto approving");
-            wakeup :=
-              Some
-                (Lwt.bind (Lwt_unix.sleep 3.) (approve_service db id callback));
+            let resolver = Resolver.make id in
+            Callback.succeed callback ~resolver >>= fun () ->
             Lwt.return_ok (Service.Response.create_empty ()))
 
   let handle_auth ~bootstrap_key ~bootstrap_fn ~register_fn request_key =
@@ -88,7 +89,7 @@ module Make (DB : Db.S) = struct
     @@ object
          inherit Registrar.service
 
-         method register_impl params release_param_caps =
+         method register_impl params _release_param_caps =
            let open Registrar.Register in
            let request = Params.request_get params in
            let name =
@@ -98,12 +99,14 @@ module Make (DB : Db.S) = struct
              RegistrationApi.Reader.RegistrationRequest.callback_get request
            in
            let request_key =
-             RegistrationApi.Reader.RegistrationRequest.bootstrap_key_get
-               request
+             match
+               RegistrationApi.Reader.RegistrationRequest.bootstrap_key_get
+                 request
+             with
+             | "" -> None
+             | s -> Some s
            in
            Log.info (fun m -> m "Received registration request for: `%s`" name);
-           release_param_caps ();
-
            match callback with
            | None -> Service.fail "No callback"
            | Some callback ->
@@ -111,6 +114,6 @@ module Make (DB : Db.S) = struct
                handle_auth ~bootstrap_key:key
                  ~bootstrap_fn:(handle_boostrap ~db ~request ~name callback)
                  ~register_fn:(handle_registration ~db ~request ~name)
-                 (Some request_key)
+                 request_key
        end
 end
