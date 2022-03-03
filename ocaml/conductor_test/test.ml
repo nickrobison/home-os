@@ -1,1 +1,1 @@
-let () = Lwt_main.run @@ Alcotest_lwt.run "conductor" Db_irmin.test_cases
+let () = Lwt_main.run @@ Alcotest_lwt.run "conductor" Db.test_cases

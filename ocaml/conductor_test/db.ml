@@ -5,7 +5,7 @@ module Info = struct
 end
 
 module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
-module DB = Conductor.Db_irmin.Make (Store) (Info)
+module DB = Conductor__.Db_memory
 module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
 let user = Conductor__.User.system_user
@@ -18,7 +18,7 @@ let status_test =
   Alcotest.testable Conductor.Models.pp_registration_status
     Conductor.Models.equal_registration_status
 
-let config () = DB.create (Irmin_mem.config ())
+let config () = DB.create ()
 
 let details =
   let open Reg.Builder.RegistrationRequest in
@@ -40,7 +40,7 @@ let app : Conductor.Models.application_record =
     name = "Test request";
     status = Pending;
     hash =
-      "01e8e2b114ae0e9503a514c5b15d92309b15b536a7a718c4d57b6d9aa7966d746a2275c87ecebd05457efb37fe51fb37a31cb6e205c88357b1818356cf287bb4";
+      "31c658bd0c49e3f790c21beb9f32a9463e9fcbf7473cbc3b8845b4e31c8c240a758864850c7e9093b8c93430b83df8e0fa3a1a6eb80953b3933f94bfa3031739";
     details;
   }
 
@@ -100,7 +100,7 @@ let update_unknown _ () =
       match e with
       | `Not_found msg ->
           Alcotest.(check string)
-            "Should have correct error" "nope, not there" msg
+            "Should have correct error" "Cannot find key" msg
       | e -> Alcotest.failf "Unexpected error: %a" DB.pp_read_error e)
 
 let test_cases =
