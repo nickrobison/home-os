@@ -14,27 +14,35 @@ module Make (DB : Db.S) = struct
       let open RegistrationApi.Client.RegistrationCallback.Success in
       let request, params = Capability.Request.create Params.init_pointer in
       Params.resolver_set params (Some resolver);
+      Log.info (fun m -> m "Calling, let's see if this works");
       Capability.call_for_unit_exn t method_id request
 
     let fail t msg =
       let open RegistrationApi.Client.RegistrationCallback.Failure in
       let request, params = Capability.Request.create Params.init_pointer in
       Params.err_set params msg;
-      Capability.call_for_unit_exn t method_id request
+      Capability.call_for_unit_exn t method_id request >>= fun () ->
+      Log.info (fun m -> m "Finished calling callback");
+      Lwt.return_unit
   end
 
   let rpc_fail msg = `Capnp (`Exception (Capnp_rpc.Exception.v msg))
 
-  let req_to_builder req =
-    let module B = RegistrationApi.Builder.RegistrationRequest in
+  let approve_service db id callback () =
     let module R = RegistrationApi.Reader.RegistrationRequest in
-    let builder = B.init_root () in
-    B.name_set builder (R.name_get req);
-    builder
+    DB.get_registration db ~id >>= function
+    | Error e ->
+        Log.err (fun m -> m "Unable to get registration: %a" DB.pp_read_error e);
+        Lwt.return_unit
+    | Ok _registration ->
+        Log.info (fun m -> m "I have a callback, replying");
+        let resolver = Resolver.make id in
+        Callback.succeed callback resolver
 
+  (** Register application for later approval*)
   let handle_registration ~db ~request ~name () =
     (* Submit the new request to the database*)
-    DB.create_registration db ~app:(req_to_builder request) >>= function
+    DB.create_registration db ~app:request >>= function
     | Error _e -> Lwt.return_error (rpc_fail "Cannot persist in DB")
     | Ok id ->
         Log.info (fun m ->
@@ -42,10 +50,11 @@ module Make (DB : Db.S) = struct
               id);
         Lwt.return_ok (Service.Response.create_empty ())
 
+  let wakeup : unit Lwt.t option ref = ref None
+
   (** Register and immediately approve*)
   let handle_boostrap ~db ~request ~name callback () =
-    Log.info (fun m -> m "Successfully bootstrapped service: `%s`" name);
-    DB.create_registration db ~app:(req_to_builder request) >>= function
+    DB.create_registration db ~app:request >>= function
     | Error _e -> Lwt.return_error (rpc_fail "Cannot persist in DB")
     | Ok id -> (
         DB.set_registration_status db ~user:User.system_user ~id Approved
@@ -55,14 +64,17 @@ module Make (DB : Db.S) = struct
             Log.info (fun m ->
                 m "Successfully registered service: `%s` with id: %a" name
                   Uuidm.pp id);
-            (* Create a new service resolver and return it*)
-            let resolver = Resolver.make id in
-            Callback.succeed callback resolver >|= fun () ->
-            Ok (Service.Response.create_empty ()))
+            (* This is hacky, but we'll just wait for 3 seconds and then approve async like*)
+            Log.warn (fun m -> m "Waiting 3 seconds and then auto approving");
+            wakeup :=
+              Some
+                (Lwt.bind (Lwt_unix.sleep 3.) (approve_service db id callback));
+            Lwt.return_ok (Service.Response.create_empty ()))
 
   let handle_auth ~bootstrap_key ~bootstrap_fn ~register_fn request_key =
     match (bootstrap_key, request_key) with
     | Some bk, Some rq ->
+        (* TODO: This should be a constant time comparison*)
         if String.equal bk rq then bootstrap_fn ()
         else (
           Log.err (fun m -> m "Bootstrap authentication failed");

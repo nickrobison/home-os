@@ -15,7 +15,7 @@ module type S = sig
   [@@deriving show, eq, ord]
 
   val create_registration :
-    t -> app:Reg.Builder.RegistrationRequest.t -> (Uuidm.t, error) result Lwt.t
+    t -> app:Reg.Reader.RegistrationRequest.t -> (Uuidm.t, error) result Lwt.t
 
   val get_registration :
     t -> id:Uuidm.t -> (Models.application_record, [> read_error ]) result Lwt.t

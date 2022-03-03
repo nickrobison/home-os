@@ -1,12 +1,12 @@
 open Lwt.Syntax
-module Db_irmin = Db_irmin
+module Db_memory = Db_memory
 module Models = Models
 
 module Make
     (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t)
     (I : Db.Info) =
 struct
-  module DB = Db_irmin.Make (Store) (I)
+  module DB = Db_memory
   module Registrar = Registrar.Make (DB)
 
   type config = { bootstrap_key : string option; db_config : DB.config }

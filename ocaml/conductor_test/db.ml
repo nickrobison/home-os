@@ -5,7 +5,7 @@ module Info = struct
 end
 
 module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
-module DB = Conductor__.Db_memory
+module DB = Conductor.Db_memory
 module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
 let user = Conductor__.User.system_user
@@ -25,7 +25,7 @@ let details =
   let d = init_root () in
   name_set d "Test request";
   description_set d "Test Description";
-  d
+  to_reader d
 
 let uuid_gen_exn str =
   match Uuidm.of_string str with Some v -> v | None -> failwith "Invalid uuid"
@@ -39,9 +39,9 @@ let app : Conductor.Models.application_record =
     id = test_id;
     name = "Test request";
     status = Pending;
-    hash =
-      "31c658bd0c49e3f790c21beb9f32a9463e9fcbf7473cbc3b8845b4e31c8c240a758864850c7e9093b8c93430b83df8e0fa3a1a6eb80953b3933f94bfa3031739";
     details;
+    hash =
+      "551f1d99d289f1b9ce06812902f8f3e42d373c25c292ee4b3ccf7091a77796b763aa246706a2ea5fe41b24009337b9329534d4b4021d351c67d7bc71812caa02";
   }
 
 let simple_get _ () =
@@ -73,7 +73,7 @@ let update_status _ () =
           | Ok v ->
               Alcotest.(check status_test) "Should be equal" Approved v.status;
               let description =
-                Reg.Builder.RegistrationRequest.description_get v.details
+                Reg.Reader.RegistrationRequest.description_get v.details
               in
               Alcotest.(check string)
                 "Should have correct description" "Test Description" description
