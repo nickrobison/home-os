@@ -1,0 +1,39 @@
+name: Build Ocaml code
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+    paths:
+      - 'ocaml/**'
+      - 'protocols/**'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+        ocaml-compiler:
+          - 4.13.x
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - run: opam install . --deps-only --with-test
+
+      - run: opam exec -- dune build
+
+      - run: opam exec -- dune runtest
