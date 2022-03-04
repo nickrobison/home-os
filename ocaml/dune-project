@@ -21,7 +21,7 @@
     (ocaml (>= 4.12))
     (alcotest :with-test)
     (alcotest-lwt :with-test)
-    (dune (> 1.5))
+    dune
     capnp-rpc-lwt
     logs
     fmt
