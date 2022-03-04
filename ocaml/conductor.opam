@@ -14,7 +14,7 @@ depends: [
   "capnp-rpc-lwt"
   "logs"
   "fmt"
-  "irmin-git"
+  "irmin-git" {< "3.0.0"}
   "ppx_deriving"
   "ppx_import"
   "ezjsonm"
