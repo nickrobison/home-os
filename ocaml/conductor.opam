@@ -10,11 +10,11 @@ depends: [
   "ocaml" {>= "4.12"}
   "alcotest" {with-test}
   "alcotest-lwt" {with-test}
-  "dune" {>= "2.8" & > "1.5"}
+  "dune" {>= "2.8"}
   "capnp-rpc-lwt"
   "logs"
   "fmt"
-  "irmin-git"
+  "irmin-git" {< "3.0.0"}
   "ppx_deriving"
   "ppx_import"
   "ezjsonm"

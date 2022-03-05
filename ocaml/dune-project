@@ -21,11 +21,11 @@
     (ocaml (>= 4.12))
     (alcotest :with-test)
     (alcotest-lwt :with-test)
-    (dune (> 1.5))
+    dune
     capnp-rpc-lwt
     logs
     fmt
-    irmin-git
+    (irmin-git (< 3.0.0))
     ppx_deriving
     ppx_import
     ezjsonm
@@ -40,5 +40,5 @@ uuidm))
     cmdliner
     logs
     capnp-rpc-unix
-    irmin-unix
+    (irmin-unix (< 3.0.0))
     (alcotest :with-test)))

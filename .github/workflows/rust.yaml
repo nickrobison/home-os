@@ -1,0 +1,49 @@
+name: Build Rust code
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+    paths:
+      - 'rust/**'
+      - 'protocols/**'
+      - '.github/workflows/rust.yaml'
+
+defaults:
+  run:
+    working-directory: ./rust
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: (Windows) Install Dependencies
+        if: runner.os == 'Windows'
+        run: choco install capnproto
+
+      - name: (macOS) Install Dependencies
+        if: runner.os == 'macOS'
+        run: brew install capnp
+
+      - name: (Ubuntu) Install Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install capnproto
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo test --release --all-features
