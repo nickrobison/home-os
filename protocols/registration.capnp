@@ -1,4 +1,7 @@
+using Go = import "/go.capnp";
 @0x8f5494d9dd28283d;
+$Go.package("protocols");
+$Go.import("src/protocols");
 
 using Services = import "services.capnp";
 
