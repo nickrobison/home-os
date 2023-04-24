@@ -1,3 +1,6 @@
+using Go = import "/go.capnp";
+$Go.package("protocols");
+$Go.import("protocols");
 @0xc44af6dd60b5376e;
 
 interface Logger {
