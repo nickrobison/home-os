@@ -219,21 +219,21 @@ func (s ConfigFactory_create_Params) Message() *capnp.Message {
 func (s ConfigFactory_create_Params) Segment() *capnp.Segment {
 	return capnp.Struct(s).Segment()
 }
-func (s ConfigFactory_create_Params) Name() (string, error) {
+func (s ConfigFactory_create_Params) ServiceName() (string, error) {
 	p, err := capnp.Struct(s).Ptr(0)
 	return p.Text(), err
 }
 
-func (s ConfigFactory_create_Params) HasName() bool {
+func (s ConfigFactory_create_Params) HasServiceName() bool {
 	return capnp.Struct(s).HasPtr(0)
 }
 
-func (s ConfigFactory_create_Params) NameBytes() ([]byte, error) {
+func (s ConfigFactory_create_Params) ServiceNameBytes() ([]byte, error) {
 	p, err := capnp.Struct(s).Ptr(0)
 	return p.TextBytes(), err
 }
 
-func (s ConfigFactory_create_Params) SetName(v string) error {
+func (s ConfigFactory_create_Params) SetServiceName(v string) error {
 	return capnp.Struct(s).SetText(0, v)
 }
 
@@ -301,22 +301,22 @@ func (s ConfigFactory_create_Results) Message() *capnp.Message {
 func (s ConfigFactory_create_Results) Segment() *capnp.Segment {
 	return capnp.Struct(s).Segment()
 }
-func (s ConfigFactory_create_Results) V() (string, error) {
-	p, err := capnp.Struct(s).Ptr(0)
-	return p.Text(), err
+func (s ConfigFactory_create_Results) Namespace() ConfigNamespace {
+	p, _ := capnp.Struct(s).Ptr(0)
+	return ConfigNamespace(p.Interface().Client())
 }
 
-func (s ConfigFactory_create_Results) HasV() bool {
+func (s ConfigFactory_create_Results) HasNamespace() bool {
 	return capnp.Struct(s).HasPtr(0)
 }
 
-func (s ConfigFactory_create_Results) VBytes() ([]byte, error) {
-	p, err := capnp.Struct(s).Ptr(0)
-	return p.TextBytes(), err
-}
-
-func (s ConfigFactory_create_Results) SetV(v string) error {
-	return capnp.Struct(s).SetText(0, v)
+func (s ConfigFactory_create_Results) SetNamespace(v ConfigNamespace) error {
+	if !v.IsValid() {
+		return capnp.Struct(s).SetPtr(0, capnp.Ptr{})
+	}
+	seg := s.Segment()
+	in := capnp.NewInterface(seg, seg.Message().CapTable().Add(capnp.Client(v)))
+	return capnp.Struct(s).SetPtr(0, in.ToPtr())
 }
 
 // ConfigFactory_create_Results_List is a list of ConfigFactory_create_Results.
@@ -335,31 +335,1822 @@ func (f ConfigFactory_create_Results_Future) Struct() (ConfigFactory_create_Resu
 	p, err := f.Future.Ptr()
 	return ConfigFactory_create_Results(p.Struct()), err
 }
+func (p ConfigFactory_create_Results_Future) Namespace() ConfigNamespace {
+	return ConfigNamespace(p.Future.Field(0, nil).Client())
+}
 
-const schema_9f394813d4260427 = "x\xda\x12\x98\xe0\xc0b\xc8\x9b\xcf\xc4\xc0\x14(\xc3\xca" +
-	"\xf6\x7f\xd7\xaaP\xd9\xf5:\xba\x1d\x0c\x82\xd2\x8c\x0c\x0c" +
-	"\xac\x8c\xec\x0c\x0c\xc6\xb2\x8c^\x8c\x0c\x8c\xc2\x9a\x8c\xf6" +
-	"\x0c\x8c\xffS\x95Z\x1f\xda\x14ww!+\xf0d\x0c" +
-	"\x02)\x08\x05+\xd8w\xf8\xd0\xc5\xdc\x86\xa0'\x0c\x82" +
-	"\xbc\xcc\xff\xd5Y\xd4\xae\x08{X\xceg``\x14." +
-	"e\xbc%\xdc\x08R/\\\xcb\xe8.\xbc\x94\x91\x9dA" +
-	"\xe7\x7fr~^Zf\xba^2KbA^\x81\x95" +
-	"3\x98\xe7\x96\x98\\\x92_T\xa9\x97\\\x94\x9aX\x92" +
-	"\xaa\x12\x90X\x94\x98[\xcc\xc0\x10\xc8\xc2\xcc\xc2\xc0\xc0" +
-	"\xc2\xc8\xc0 \xc8\xab\xc5\xc0\x10\xc8\xc1\xcc\x18(\xc2\xc4" +
-	"\xc8\x9f\x97\x98\x9b\xca\xc8\xc3\xc0\xc4\xc8\xc3\xc0H\x8cy" +
-	"A\xa9\xc5\xa59%\x8c\xc5\xc8\xe6\x09!\xccc,\xc3" +
-	"0\x8c\x09\xdd0\xe6\xa2\xca\x00F\xc6@\x16fV\x06" +
-	"\x06x\x881\xc2BFP\xd0\x8a\x81I\x90\x95\xdd\x1e" +
-	"b\xa1\x03c\x00## \x00\x00\xff\xff\xc0\x04Y\x90"
+type ConfigNode capnp.Client
+
+// ConfigNode_TypeID is the unique identifier for the type ConfigNode.
+const ConfigNode_TypeID = 0xf58fa7cf686fe741
+
+func (c ConfigNode) Name(ctx context.Context, params func(ConfigNode_name_Params) error) (ConfigNode_name_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNode_name_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNode_name_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigNode) WaitStreaming() error {
+	return capnp.Client(c).WaitStreaming()
+}
+
+// String returns a string that identifies this capability for debugging
+// purposes.  Its format should not be depended on: in particular, it
+// should not be used to compare clients.  Use IsSame to compare clients
+// for equality.
+func (c ConfigNode) String() string {
+	return "ConfigNode(" + capnp.Client(c).String() + ")"
+}
+
+// AddRef creates a new Client that refers to the same capability as c.
+// If c is nil or has resolved to null, then AddRef returns nil.
+func (c ConfigNode) AddRef() ConfigNode {
+	return ConfigNode(capnp.Client(c).AddRef())
+}
+
+// Release releases a capability reference.  If this is the last
+// reference to the capability, then the underlying resources associated
+// with the capability will be released.
+//
+// Release will panic if c has already been released, but not if c is
+// nil or resolved to null.
+func (c ConfigNode) Release() {
+	capnp.Client(c).Release()
+}
+
+// Resolve blocks until the capability is fully resolved or the Context
+// expires.
+func (c ConfigNode) Resolve(ctx context.Context) error {
+	return capnp.Client(c).Resolve(ctx)
+}
+
+func (c ConfigNode) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Client(c).EncodeAsPtr(seg)
+}
+
+func (ConfigNode) DecodeFromPtr(p capnp.Ptr) ConfigNode {
+	return ConfigNode(capnp.Client{}.DecodeFromPtr(p))
+}
+
+// IsValid reports whether c is a valid reference to a capability.
+// A reference is invalid if it is nil, has resolved to null, or has
+// been released.
+func (c ConfigNode) IsValid() bool {
+	return capnp.Client(c).IsValid()
+}
+
+// IsSame reports whether c and other refer to a capability created by the
+// same call to NewClient.  This can return false negatives if c or other
+// are not fully resolved: use Resolve if this is an issue.  If either
+// c or other are released, then IsSame panics.
+func (c ConfigNode) IsSame(other ConfigNode) bool {
+	return capnp.Client(c).IsSame(capnp.Client(other))
+}
+
+// Update the flowcontrol.FlowLimiter used to manage flow control for
+// this client. This affects all future calls, but not calls already
+// waiting to send. Passing nil sets the value to flowcontrol.NopLimiter,
+// which is also the default.
+func (c ConfigNode) SetFlowLimiter(lim fc.FlowLimiter) {
+	capnp.Client(c).SetFlowLimiter(lim)
+}
+
+// Get the current flowcontrol.FlowLimiter used to manage flow control
+// for this client.
+func (c ConfigNode) GetFlowLimiter() fc.FlowLimiter {
+	return capnp.Client(c).GetFlowLimiter()
+}
+
+// A ConfigNode_Server is a ConfigNode with a local implementation.
+type ConfigNode_Server interface {
+	Name(context.Context, ConfigNode_name) error
+}
+
+// ConfigNode_NewServer creates a new Server from an implementation of ConfigNode_Server.
+func ConfigNode_NewServer(s ConfigNode_Server) *server.Server {
+	c, _ := s.(server.Shutdowner)
+	return server.New(ConfigNode_Methods(nil, s), s, c)
+}
+
+// ConfigNode_ServerToClient creates a new Client from an implementation of ConfigNode_Server.
+// The caller is responsible for calling Release on the returned Client.
+func ConfigNode_ServerToClient(s ConfigNode_Server) ConfigNode {
+	return ConfigNode(capnp.NewClient(ConfigNode_NewServer(s)))
+}
+
+// ConfigNode_Methods appends Methods to a slice that invoke the methods on s.
+// This can be used to create a more complicated Server.
+func ConfigNode_Methods(methods []server.Method, s ConfigNode_Server) []server.Method {
+	if cap(methods) == 0 {
+		methods = make([]server.Method, 0, 1)
+	}
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Name(ctx, ConfigNode_name{call})
+		},
+	})
+
+	return methods
+}
+
+// ConfigNode_name holds the state for a server call to ConfigNode.name.
+// See server.Call for documentation.
+type ConfigNode_name struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigNode_name) Args() ConfigNode_name_Params {
+	return ConfigNode_name_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigNode_name) AllocResults() (ConfigNode_name_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNode_name_Results(r), err
+}
+
+// ConfigNode_List is a list of ConfigNode.
+type ConfigNode_List = capnp.CapList[ConfigNode]
+
+// NewConfigNode creates a new list of ConfigNode.
+func NewConfigNode_List(s *capnp.Segment, sz int32) (ConfigNode_List, error) {
+	l, err := capnp.NewPointerList(s, sz)
+	return capnp.CapList[ConfigNode](l), err
+}
+
+type ConfigNode_name_Params capnp.Struct
+
+// ConfigNode_name_Params_TypeID is the unique identifier for the type ConfigNode_name_Params.
+const ConfigNode_name_Params_TypeID = 0xd8a7152ea1d16e91
+
+func NewConfigNode_name_Params(s *capnp.Segment) (ConfigNode_name_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigNode_name_Params(st), err
+}
+
+func NewRootConfigNode_name_Params(s *capnp.Segment) (ConfigNode_name_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigNode_name_Params(st), err
+}
+
+func ReadRootConfigNode_name_Params(msg *capnp.Message) (ConfigNode_name_Params, error) {
+	root, err := msg.Root()
+	return ConfigNode_name_Params(root.Struct()), err
+}
+
+func (s ConfigNode_name_Params) String() string {
+	str, _ := text.Marshal(0xd8a7152ea1d16e91, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNode_name_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNode_name_Params) DecodeFromPtr(p capnp.Ptr) ConfigNode_name_Params {
+	return ConfigNode_name_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNode_name_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNode_name_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNode_name_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNode_name_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+
+// ConfigNode_name_Params_List is a list of ConfigNode_name_Params.
+type ConfigNode_name_Params_List = capnp.StructList[ConfigNode_name_Params]
+
+// NewConfigNode_name_Params creates a new list of ConfigNode_name_Params.
+func NewConfigNode_name_Params_List(s *capnp.Segment, sz int32) (ConfigNode_name_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return capnp.StructList[ConfigNode_name_Params](l), err
+}
+
+// ConfigNode_name_Params_Future is a wrapper for a ConfigNode_name_Params promised by a client call.
+type ConfigNode_name_Params_Future struct{ *capnp.Future }
+
+func (f ConfigNode_name_Params_Future) Struct() (ConfigNode_name_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNode_name_Params(p.Struct()), err
+}
+
+type ConfigNode_name_Results capnp.Struct
+
+// ConfigNode_name_Results_TypeID is the unique identifier for the type ConfigNode_name_Results.
+const ConfigNode_name_Results_TypeID = 0xf8f966b9397a95d3
+
+func NewConfigNode_name_Results(s *capnp.Segment) (ConfigNode_name_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNode_name_Results(st), err
+}
+
+func NewRootConfigNode_name_Results(s *capnp.Segment) (ConfigNode_name_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNode_name_Results(st), err
+}
+
+func ReadRootConfigNode_name_Results(msg *capnp.Message) (ConfigNode_name_Results, error) {
+	root, err := msg.Root()
+	return ConfigNode_name_Results(root.Struct()), err
+}
+
+func (s ConfigNode_name_Results) String() string {
+	str, _ := text.Marshal(0xf8f966b9397a95d3, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNode_name_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNode_name_Results) DecodeFromPtr(p capnp.Ptr) ConfigNode_name_Results {
+	return ConfigNode_name_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNode_name_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNode_name_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNode_name_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNode_name_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNode_name_Results) Name() (string, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.Text(), err
+}
+
+func (s ConfigNode_name_Results) HasName() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNode_name_Results) NameBytes() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s ConfigNode_name_Results) SetName(v string) error {
+	return capnp.Struct(s).SetText(0, v)
+}
+
+// ConfigNode_name_Results_List is a list of ConfigNode_name_Results.
+type ConfigNode_name_Results_List = capnp.StructList[ConfigNode_name_Results]
+
+// NewConfigNode_name_Results creates a new list of ConfigNode_name_Results.
+func NewConfigNode_name_Results_List(s *capnp.Segment, sz int32) (ConfigNode_name_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNode_name_Results](l), err
+}
+
+// ConfigNode_name_Results_Future is a wrapper for a ConfigNode_name_Results promised by a client call.
+type ConfigNode_name_Results_Future struct{ *capnp.Future }
+
+func (f ConfigNode_name_Results_Future) Struct() (ConfigNode_name_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNode_name_Results(p.Struct()), err
+}
+
+type ConfigNamespace capnp.Client
+
+// ConfigNamespace_TypeID is the unique identifier for the type ConfigNamespace.
+const ConfigNamespace_TypeID = 0xf76681f054409bb0
+
+func (c ConfigNamespace) List(ctx context.Context, params func(ConfigNamespace_list_Params) error) (ConfigNamespace_list_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "list",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNamespace_list_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNamespace_list_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigNamespace) CreateValue(ctx context.Context, params func(ConfigNamespace_createValue_Params) error) (ConfigNamespace_createValue_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      1,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "createValue",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNamespace_createValue_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNamespace_createValue_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigNamespace) CreateNamespace(ctx context.Context, params func(ConfigNamespace_createNamespace_Params) error) (ConfigNamespace_createNamespace_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      2,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "createNamespace",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNamespace_createNamespace_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNamespace_createNamespace_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigNamespace) Name(ctx context.Context, params func(ConfigNode_name_Params) error) (ConfigNode_name_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNode_name_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNode_name_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigNamespace) WaitStreaming() error {
+	return capnp.Client(c).WaitStreaming()
+}
+
+// String returns a string that identifies this capability for debugging
+// purposes.  Its format should not be depended on: in particular, it
+// should not be used to compare clients.  Use IsSame to compare clients
+// for equality.
+func (c ConfigNamespace) String() string {
+	return "ConfigNamespace(" + capnp.Client(c).String() + ")"
+}
+
+// AddRef creates a new Client that refers to the same capability as c.
+// If c is nil or has resolved to null, then AddRef returns nil.
+func (c ConfigNamespace) AddRef() ConfigNamespace {
+	return ConfigNamespace(capnp.Client(c).AddRef())
+}
+
+// Release releases a capability reference.  If this is the last
+// reference to the capability, then the underlying resources associated
+// with the capability will be released.
+//
+// Release will panic if c has already been released, but not if c is
+// nil or resolved to null.
+func (c ConfigNamespace) Release() {
+	capnp.Client(c).Release()
+}
+
+// Resolve blocks until the capability is fully resolved or the Context
+// expires.
+func (c ConfigNamespace) Resolve(ctx context.Context) error {
+	return capnp.Client(c).Resolve(ctx)
+}
+
+func (c ConfigNamespace) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Client(c).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace) DecodeFromPtr(p capnp.Ptr) ConfigNamespace {
+	return ConfigNamespace(capnp.Client{}.DecodeFromPtr(p))
+}
+
+// IsValid reports whether c is a valid reference to a capability.
+// A reference is invalid if it is nil, has resolved to null, or has
+// been released.
+func (c ConfigNamespace) IsValid() bool {
+	return capnp.Client(c).IsValid()
+}
+
+// IsSame reports whether c and other refer to a capability created by the
+// same call to NewClient.  This can return false negatives if c or other
+// are not fully resolved: use Resolve if this is an issue.  If either
+// c or other are released, then IsSame panics.
+func (c ConfigNamespace) IsSame(other ConfigNamespace) bool {
+	return capnp.Client(c).IsSame(capnp.Client(other))
+}
+
+// Update the flowcontrol.FlowLimiter used to manage flow control for
+// this client. This affects all future calls, but not calls already
+// waiting to send. Passing nil sets the value to flowcontrol.NopLimiter,
+// which is also the default.
+func (c ConfigNamespace) SetFlowLimiter(lim fc.FlowLimiter) {
+	capnp.Client(c).SetFlowLimiter(lim)
+}
+
+// Get the current flowcontrol.FlowLimiter used to manage flow control
+// for this client.
+func (c ConfigNamespace) GetFlowLimiter() fc.FlowLimiter {
+	return capnp.Client(c).GetFlowLimiter()
+}
+
+// A ConfigNamespace_Server is a ConfigNamespace with a local implementation.
+type ConfigNamespace_Server interface {
+	List(context.Context, ConfigNamespace_list) error
+
+	CreateValue(context.Context, ConfigNamespace_createValue) error
+
+	CreateNamespace(context.Context, ConfigNamespace_createNamespace) error
+
+	Name(context.Context, ConfigNode_name) error
+}
+
+// ConfigNamespace_NewServer creates a new Server from an implementation of ConfigNamespace_Server.
+func ConfigNamespace_NewServer(s ConfigNamespace_Server) *server.Server {
+	c, _ := s.(server.Shutdowner)
+	return server.New(ConfigNamespace_Methods(nil, s), s, c)
+}
+
+// ConfigNamespace_ServerToClient creates a new Client from an implementation of ConfigNamespace_Server.
+// The caller is responsible for calling Release on the returned Client.
+func ConfigNamespace_ServerToClient(s ConfigNamespace_Server) ConfigNamespace {
+	return ConfigNamespace(capnp.NewClient(ConfigNamespace_NewServer(s)))
+}
+
+// ConfigNamespace_Methods appends Methods to a slice that invoke the methods on s.
+// This can be used to create a more complicated Server.
+func ConfigNamespace_Methods(methods []server.Method, s ConfigNamespace_Server) []server.Method {
+	if cap(methods) == 0 {
+		methods = make([]server.Method, 0, 4)
+	}
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "list",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.List(ctx, ConfigNamespace_list{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      1,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "createValue",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.CreateValue(ctx, ConfigNamespace_createValue{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf76681f054409bb0,
+			MethodID:      2,
+			InterfaceName: "config.capnp:ConfigNamespace",
+			MethodName:    "createNamespace",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.CreateNamespace(ctx, ConfigNamespace_createNamespace{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Name(ctx, ConfigNode_name{call})
+		},
+	})
+
+	return methods
+}
+
+// ConfigNamespace_list holds the state for a server call to ConfigNamespace.list.
+// See server.Call for documentation.
+type ConfigNamespace_list struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigNamespace_list) Args() ConfigNamespace_list_Params {
+	return ConfigNamespace_list_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigNamespace_list) AllocResults() (ConfigNamespace_list_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_list_Results(r), err
+}
+
+// ConfigNamespace_createValue holds the state for a server call to ConfigNamespace.createValue.
+// See server.Call for documentation.
+type ConfigNamespace_createValue struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigNamespace_createValue) Args() ConfigNamespace_createValue_Params {
+	return ConfigNamespace_createValue_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigNamespace_createValue) AllocResults() (ConfigNamespace_createValue_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createValue_Results(r), err
+}
+
+// ConfigNamespace_createNamespace holds the state for a server call to ConfigNamespace.createNamespace.
+// See server.Call for documentation.
+type ConfigNamespace_createNamespace struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigNamespace_createNamespace) Args() ConfigNamespace_createNamespace_Params {
+	return ConfigNamespace_createNamespace_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigNamespace_createNamespace) AllocResults() (ConfigNamespace_createNamespace_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createNamespace_Results(r), err
+}
+
+// ConfigNamespace_List is a list of ConfigNamespace.
+type ConfigNamespace_List = capnp.CapList[ConfigNamespace]
+
+// NewConfigNamespace creates a new list of ConfigNamespace.
+func NewConfigNamespace_List(s *capnp.Segment, sz int32) (ConfigNamespace_List, error) {
+	l, err := capnp.NewPointerList(s, sz)
+	return capnp.CapList[ConfigNamespace](l), err
+}
+
+type ConfigNamespace_Entry capnp.Struct
+
+// ConfigNamespace_Entry_TypeID is the unique identifier for the type ConfigNamespace_Entry.
+const ConfigNamespace_Entry_TypeID = 0xcfd9f1d0d279d450
+
+func NewConfigNamespace_Entry(s *capnp.Segment) (ConfigNamespace_Entry, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2})
+	return ConfigNamespace_Entry(st), err
+}
+
+func NewRootConfigNamespace_Entry(s *capnp.Segment) (ConfigNamespace_Entry, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2})
+	return ConfigNamespace_Entry(st), err
+}
+
+func ReadRootConfigNamespace_Entry(msg *capnp.Message) (ConfigNamespace_Entry, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_Entry(root.Struct()), err
+}
+
+func (s ConfigNamespace_Entry) String() string {
+	str, _ := text.Marshal(0xcfd9f1d0d279d450, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_Entry) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_Entry) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_Entry {
+	return ConfigNamespace_Entry(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_Entry) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_Entry) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_Entry) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_Entry) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_Entry) Name() (string, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.Text(), err
+}
+
+func (s ConfigNamespace_Entry) HasName() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_Entry) NameBytes() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s ConfigNamespace_Entry) SetName(v string) error {
+	return capnp.Struct(s).SetText(0, v)
+}
+
+func (s ConfigNamespace_Entry) Node() ConfigNode {
+	p, _ := capnp.Struct(s).Ptr(1)
+	return ConfigNode(p.Interface().Client())
+}
+
+func (s ConfigNamespace_Entry) HasNode() bool {
+	return capnp.Struct(s).HasPtr(1)
+}
+
+func (s ConfigNamespace_Entry) SetNode(v ConfigNode) error {
+	if !v.IsValid() {
+		return capnp.Struct(s).SetPtr(1, capnp.Ptr{})
+	}
+	seg := s.Segment()
+	in := capnp.NewInterface(seg, seg.Message().CapTable().Add(capnp.Client(v)))
+	return capnp.Struct(s).SetPtr(1, in.ToPtr())
+}
+
+// ConfigNamespace_Entry_List is a list of ConfigNamespace_Entry.
+type ConfigNamespace_Entry_List = capnp.StructList[ConfigNamespace_Entry]
+
+// NewConfigNamespace_Entry creates a new list of ConfigNamespace_Entry.
+func NewConfigNamespace_Entry_List(s *capnp.Segment, sz int32) (ConfigNamespace_Entry_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2}, sz)
+	return capnp.StructList[ConfigNamespace_Entry](l), err
+}
+
+// ConfigNamespace_Entry_Future is a wrapper for a ConfigNamespace_Entry promised by a client call.
+type ConfigNamespace_Entry_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_Entry_Future) Struct() (ConfigNamespace_Entry, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_Entry(p.Struct()), err
+}
+func (p ConfigNamespace_Entry_Future) Node() ConfigNode {
+	return ConfigNode(p.Future.Field(1, nil).Client())
+}
+
+type ConfigNamespace_list_Params capnp.Struct
+
+// ConfigNamespace_list_Params_TypeID is the unique identifier for the type ConfigNamespace_list_Params.
+const ConfigNamespace_list_Params_TypeID = 0xe2f259a1344bcb0b
+
+func NewConfigNamespace_list_Params(s *capnp.Segment) (ConfigNamespace_list_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigNamespace_list_Params(st), err
+}
+
+func NewRootConfigNamespace_list_Params(s *capnp.Segment) (ConfigNamespace_list_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigNamespace_list_Params(st), err
+}
+
+func ReadRootConfigNamespace_list_Params(msg *capnp.Message) (ConfigNamespace_list_Params, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_list_Params(root.Struct()), err
+}
+
+func (s ConfigNamespace_list_Params) String() string {
+	str, _ := text.Marshal(0xe2f259a1344bcb0b, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_list_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_list_Params) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_list_Params {
+	return ConfigNamespace_list_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_list_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_list_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_list_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_list_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+
+// ConfigNamespace_list_Params_List is a list of ConfigNamespace_list_Params.
+type ConfigNamespace_list_Params_List = capnp.StructList[ConfigNamespace_list_Params]
+
+// NewConfigNamespace_list_Params creates a new list of ConfigNamespace_list_Params.
+func NewConfigNamespace_list_Params_List(s *capnp.Segment, sz int32) (ConfigNamespace_list_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return capnp.StructList[ConfigNamespace_list_Params](l), err
+}
+
+// ConfigNamespace_list_Params_Future is a wrapper for a ConfigNamespace_list_Params promised by a client call.
+type ConfigNamespace_list_Params_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_list_Params_Future) Struct() (ConfigNamespace_list_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_list_Params(p.Struct()), err
+}
+
+type ConfigNamespace_list_Results capnp.Struct
+
+// ConfigNamespace_list_Results_TypeID is the unique identifier for the type ConfigNamespace_list_Results.
+const ConfigNamespace_list_Results_TypeID = 0xd23da1f4cdf5fd14
+
+func NewConfigNamespace_list_Results(s *capnp.Segment) (ConfigNamespace_list_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_list_Results(st), err
+}
+
+func NewRootConfigNamespace_list_Results(s *capnp.Segment) (ConfigNamespace_list_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_list_Results(st), err
+}
+
+func ReadRootConfigNamespace_list_Results(msg *capnp.Message) (ConfigNamespace_list_Results, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_list_Results(root.Struct()), err
+}
+
+func (s ConfigNamespace_list_Results) String() string {
+	str, _ := text.Marshal(0xd23da1f4cdf5fd14, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_list_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_list_Results) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_list_Results {
+	return ConfigNamespace_list_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_list_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_list_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_list_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_list_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_list_Results) List() (ConfigNamespace_Entry_List, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return ConfigNamespace_Entry_List(p.List()), err
+}
+
+func (s ConfigNamespace_list_Results) HasList() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_list_Results) SetList(v ConfigNamespace_Entry_List) error {
+	return capnp.Struct(s).SetPtr(0, v.ToPtr())
+}
+
+// NewList sets the list field to a newly
+// allocated ConfigNamespace_Entry_List, preferring placement in s's segment.
+func (s ConfigNamespace_list_Results) NewList(n int32) (ConfigNamespace_Entry_List, error) {
+	l, err := NewConfigNamespace_Entry_List(capnp.Struct(s).Segment(), n)
+	if err != nil {
+		return ConfigNamespace_Entry_List{}, err
+	}
+	err = capnp.Struct(s).SetPtr(0, l.ToPtr())
+	return l, err
+}
+
+// ConfigNamespace_list_Results_List is a list of ConfigNamespace_list_Results.
+type ConfigNamespace_list_Results_List = capnp.StructList[ConfigNamespace_list_Results]
+
+// NewConfigNamespace_list_Results creates a new list of ConfigNamespace_list_Results.
+func NewConfigNamespace_list_Results_List(s *capnp.Segment, sz int32) (ConfigNamespace_list_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNamespace_list_Results](l), err
+}
+
+// ConfigNamespace_list_Results_Future is a wrapper for a ConfigNamespace_list_Results promised by a client call.
+type ConfigNamespace_list_Results_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_list_Results_Future) Struct() (ConfigNamespace_list_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_list_Results(p.Struct()), err
+}
+
+type ConfigNamespace_createValue_Params capnp.Struct
+
+// ConfigNamespace_createValue_Params_TypeID is the unique identifier for the type ConfigNamespace_createValue_Params.
+const ConfigNamespace_createValue_Params_TypeID = 0x8a92f758007c01b9
+
+func NewConfigNamespace_createValue_Params(s *capnp.Segment) (ConfigNamespace_createValue_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createValue_Params(st), err
+}
+
+func NewRootConfigNamespace_createValue_Params(s *capnp.Segment) (ConfigNamespace_createValue_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createValue_Params(st), err
+}
+
+func ReadRootConfigNamespace_createValue_Params(msg *capnp.Message) (ConfigNamespace_createValue_Params, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_createValue_Params(root.Struct()), err
+}
+
+func (s ConfigNamespace_createValue_Params) String() string {
+	str, _ := text.Marshal(0x8a92f758007c01b9, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_createValue_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_createValue_Params) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_createValue_Params {
+	return ConfigNamespace_createValue_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_createValue_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_createValue_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_createValue_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_createValue_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_createValue_Params) Name() (string, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.Text(), err
+}
+
+func (s ConfigNamespace_createValue_Params) HasName() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_createValue_Params) NameBytes() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s ConfigNamespace_createValue_Params) SetName(v string) error {
+	return capnp.Struct(s).SetText(0, v)
+}
+
+// ConfigNamespace_createValue_Params_List is a list of ConfigNamespace_createValue_Params.
+type ConfigNamespace_createValue_Params_List = capnp.StructList[ConfigNamespace_createValue_Params]
+
+// NewConfigNamespace_createValue_Params creates a new list of ConfigNamespace_createValue_Params.
+func NewConfigNamespace_createValue_Params_List(s *capnp.Segment, sz int32) (ConfigNamespace_createValue_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNamespace_createValue_Params](l), err
+}
+
+// ConfigNamespace_createValue_Params_Future is a wrapper for a ConfigNamespace_createValue_Params promised by a client call.
+type ConfigNamespace_createValue_Params_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_createValue_Params_Future) Struct() (ConfigNamespace_createValue_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_createValue_Params(p.Struct()), err
+}
+
+type ConfigNamespace_createValue_Results capnp.Struct
+
+// ConfigNamespace_createValue_Results_TypeID is the unique identifier for the type ConfigNamespace_createValue_Results.
+const ConfigNamespace_createValue_Results_TypeID = 0xe8dd64a6f7ce4486
+
+func NewConfigNamespace_createValue_Results(s *capnp.Segment) (ConfigNamespace_createValue_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createValue_Results(st), err
+}
+
+func NewRootConfigNamespace_createValue_Results(s *capnp.Segment) (ConfigNamespace_createValue_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createValue_Results(st), err
+}
+
+func ReadRootConfigNamespace_createValue_Results(msg *capnp.Message) (ConfigNamespace_createValue_Results, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_createValue_Results(root.Struct()), err
+}
+
+func (s ConfigNamespace_createValue_Results) String() string {
+	str, _ := text.Marshal(0xe8dd64a6f7ce4486, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_createValue_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_createValue_Results) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_createValue_Results {
+	return ConfigNamespace_createValue_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_createValue_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_createValue_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_createValue_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_createValue_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_createValue_Results) Value() ConfigValue {
+	p, _ := capnp.Struct(s).Ptr(0)
+	return ConfigValue(p.Interface().Client())
+}
+
+func (s ConfigNamespace_createValue_Results) HasValue() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_createValue_Results) SetValue(v ConfigValue) error {
+	if !v.IsValid() {
+		return capnp.Struct(s).SetPtr(0, capnp.Ptr{})
+	}
+	seg := s.Segment()
+	in := capnp.NewInterface(seg, seg.Message().CapTable().Add(capnp.Client(v)))
+	return capnp.Struct(s).SetPtr(0, in.ToPtr())
+}
+
+// ConfigNamespace_createValue_Results_List is a list of ConfigNamespace_createValue_Results.
+type ConfigNamespace_createValue_Results_List = capnp.StructList[ConfigNamespace_createValue_Results]
+
+// NewConfigNamespace_createValue_Results creates a new list of ConfigNamespace_createValue_Results.
+func NewConfigNamespace_createValue_Results_List(s *capnp.Segment, sz int32) (ConfigNamespace_createValue_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNamespace_createValue_Results](l), err
+}
+
+// ConfigNamespace_createValue_Results_Future is a wrapper for a ConfigNamespace_createValue_Results promised by a client call.
+type ConfigNamespace_createValue_Results_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_createValue_Results_Future) Struct() (ConfigNamespace_createValue_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_createValue_Results(p.Struct()), err
+}
+func (p ConfigNamespace_createValue_Results_Future) Value() ConfigValue {
+	return ConfigValue(p.Future.Field(0, nil).Client())
+}
+
+type ConfigNamespace_createNamespace_Params capnp.Struct
+
+// ConfigNamespace_createNamespace_Params_TypeID is the unique identifier for the type ConfigNamespace_createNamespace_Params.
+const ConfigNamespace_createNamespace_Params_TypeID = 0x8503beed5b8b49c6
+
+func NewConfigNamespace_createNamespace_Params(s *capnp.Segment) (ConfigNamespace_createNamespace_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createNamespace_Params(st), err
+}
+
+func NewRootConfigNamespace_createNamespace_Params(s *capnp.Segment) (ConfigNamespace_createNamespace_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createNamespace_Params(st), err
+}
+
+func ReadRootConfigNamespace_createNamespace_Params(msg *capnp.Message) (ConfigNamespace_createNamespace_Params, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_createNamespace_Params(root.Struct()), err
+}
+
+func (s ConfigNamespace_createNamespace_Params) String() string {
+	str, _ := text.Marshal(0x8503beed5b8b49c6, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_createNamespace_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_createNamespace_Params) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_createNamespace_Params {
+	return ConfigNamespace_createNamespace_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_createNamespace_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_createNamespace_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_createNamespace_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_createNamespace_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_createNamespace_Params) Name() (string, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.Text(), err
+}
+
+func (s ConfigNamespace_createNamespace_Params) HasName() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_createNamespace_Params) NameBytes() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s ConfigNamespace_createNamespace_Params) SetName(v string) error {
+	return capnp.Struct(s).SetText(0, v)
+}
+
+// ConfigNamespace_createNamespace_Params_List is a list of ConfigNamespace_createNamespace_Params.
+type ConfigNamespace_createNamespace_Params_List = capnp.StructList[ConfigNamespace_createNamespace_Params]
+
+// NewConfigNamespace_createNamespace_Params creates a new list of ConfigNamespace_createNamespace_Params.
+func NewConfigNamespace_createNamespace_Params_List(s *capnp.Segment, sz int32) (ConfigNamespace_createNamespace_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNamespace_createNamespace_Params](l), err
+}
+
+// ConfigNamespace_createNamespace_Params_Future is a wrapper for a ConfigNamespace_createNamespace_Params promised by a client call.
+type ConfigNamespace_createNamespace_Params_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_createNamespace_Params_Future) Struct() (ConfigNamespace_createNamespace_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_createNamespace_Params(p.Struct()), err
+}
+
+type ConfigNamespace_createNamespace_Results capnp.Struct
+
+// ConfigNamespace_createNamespace_Results_TypeID is the unique identifier for the type ConfigNamespace_createNamespace_Results.
+const ConfigNamespace_createNamespace_Results_TypeID = 0xcca0ea6244942880
+
+func NewConfigNamespace_createNamespace_Results(s *capnp.Segment) (ConfigNamespace_createNamespace_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createNamespace_Results(st), err
+}
+
+func NewRootConfigNamespace_createNamespace_Results(s *capnp.Segment) (ConfigNamespace_createNamespace_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigNamespace_createNamespace_Results(st), err
+}
+
+func ReadRootConfigNamespace_createNamespace_Results(msg *capnp.Message) (ConfigNamespace_createNamespace_Results, error) {
+	root, err := msg.Root()
+	return ConfigNamespace_createNamespace_Results(root.Struct()), err
+}
+
+func (s ConfigNamespace_createNamespace_Results) String() string {
+	str, _ := text.Marshal(0xcca0ea6244942880, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigNamespace_createNamespace_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigNamespace_createNamespace_Results) DecodeFromPtr(p capnp.Ptr) ConfigNamespace_createNamespace_Results {
+	return ConfigNamespace_createNamespace_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigNamespace_createNamespace_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigNamespace_createNamespace_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigNamespace_createNamespace_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigNamespace_createNamespace_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigNamespace_createNamespace_Results) Namespace() ConfigNamespace {
+	p, _ := capnp.Struct(s).Ptr(0)
+	return ConfigNamespace(p.Interface().Client())
+}
+
+func (s ConfigNamespace_createNamespace_Results) HasNamespace() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigNamespace_createNamespace_Results) SetNamespace(v ConfigNamespace) error {
+	if !v.IsValid() {
+		return capnp.Struct(s).SetPtr(0, capnp.Ptr{})
+	}
+	seg := s.Segment()
+	in := capnp.NewInterface(seg, seg.Message().CapTable().Add(capnp.Client(v)))
+	return capnp.Struct(s).SetPtr(0, in.ToPtr())
+}
+
+// ConfigNamespace_createNamespace_Results_List is a list of ConfigNamespace_createNamespace_Results.
+type ConfigNamespace_createNamespace_Results_List = capnp.StructList[ConfigNamespace_createNamespace_Results]
+
+// NewConfigNamespace_createNamespace_Results creates a new list of ConfigNamespace_createNamespace_Results.
+func NewConfigNamespace_createNamespace_Results_List(s *capnp.Segment, sz int32) (ConfigNamespace_createNamespace_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigNamespace_createNamespace_Results](l), err
+}
+
+// ConfigNamespace_createNamespace_Results_Future is a wrapper for a ConfigNamespace_createNamespace_Results promised by a client call.
+type ConfigNamespace_createNamespace_Results_Future struct{ *capnp.Future }
+
+func (f ConfigNamespace_createNamespace_Results_Future) Struct() (ConfigNamespace_createNamespace_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigNamespace_createNamespace_Results(p.Struct()), err
+}
+func (p ConfigNamespace_createNamespace_Results_Future) Namespace() ConfigNamespace {
+	return ConfigNamespace(p.Future.Field(0, nil).Client())
+}
+
+type ConfigValue capnp.Client
+
+// ConfigValue_TypeID is the unique identifier for the type ConfigValue.
+const ConfigValue_TypeID = 0xd60341b3770f3b3a
+
+func (c ConfigValue) Set(ctx context.Context, params func(ConfigValue_set_Params) error) (ConfigValue_set_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xd60341b3770f3b3a,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigValue",
+			MethodName:    "set",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigValue_set_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigValue_set_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigValue) Get(ctx context.Context, params func(ConfigValue_get_Params) error) (ConfigValue_get_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xd60341b3770f3b3a,
+			MethodID:      1,
+			InterfaceName: "config.capnp:ConfigValue",
+			MethodName:    "get",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigValue_get_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigValue_get_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigValue) Name(ctx context.Context, params func(ConfigNode_name_Params) error) (ConfigNode_name_Results_Future, capnp.ReleaseFunc) {
+
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(ConfigNode_name_Params(s)) }
+	}
+
+	ans, release := capnp.Client(c).SendCall(ctx, s)
+	return ConfigNode_name_Results_Future{Future: ans.Future()}, release
+
+}
+
+func (c ConfigValue) WaitStreaming() error {
+	return capnp.Client(c).WaitStreaming()
+}
+
+// String returns a string that identifies this capability for debugging
+// purposes.  Its format should not be depended on: in particular, it
+// should not be used to compare clients.  Use IsSame to compare clients
+// for equality.
+func (c ConfigValue) String() string {
+	return "ConfigValue(" + capnp.Client(c).String() + ")"
+}
+
+// AddRef creates a new Client that refers to the same capability as c.
+// If c is nil or has resolved to null, then AddRef returns nil.
+func (c ConfigValue) AddRef() ConfigValue {
+	return ConfigValue(capnp.Client(c).AddRef())
+}
+
+// Release releases a capability reference.  If this is the last
+// reference to the capability, then the underlying resources associated
+// with the capability will be released.
+//
+// Release will panic if c has already been released, but not if c is
+// nil or resolved to null.
+func (c ConfigValue) Release() {
+	capnp.Client(c).Release()
+}
+
+// Resolve blocks until the capability is fully resolved or the Context
+// expires.
+func (c ConfigValue) Resolve(ctx context.Context) error {
+	return capnp.Client(c).Resolve(ctx)
+}
+
+func (c ConfigValue) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Client(c).EncodeAsPtr(seg)
+}
+
+func (ConfigValue) DecodeFromPtr(p capnp.Ptr) ConfigValue {
+	return ConfigValue(capnp.Client{}.DecodeFromPtr(p))
+}
+
+// IsValid reports whether c is a valid reference to a capability.
+// A reference is invalid if it is nil, has resolved to null, or has
+// been released.
+func (c ConfigValue) IsValid() bool {
+	return capnp.Client(c).IsValid()
+}
+
+// IsSame reports whether c and other refer to a capability created by the
+// same call to NewClient.  This can return false negatives if c or other
+// are not fully resolved: use Resolve if this is an issue.  If either
+// c or other are released, then IsSame panics.
+func (c ConfigValue) IsSame(other ConfigValue) bool {
+	return capnp.Client(c).IsSame(capnp.Client(other))
+}
+
+// Update the flowcontrol.FlowLimiter used to manage flow control for
+// this client. This affects all future calls, but not calls already
+// waiting to send. Passing nil sets the value to flowcontrol.NopLimiter,
+// which is also the default.
+func (c ConfigValue) SetFlowLimiter(lim fc.FlowLimiter) {
+	capnp.Client(c).SetFlowLimiter(lim)
+}
+
+// Get the current flowcontrol.FlowLimiter used to manage flow control
+// for this client.
+func (c ConfigValue) GetFlowLimiter() fc.FlowLimiter {
+	return capnp.Client(c).GetFlowLimiter()
+}
+
+// A ConfigValue_Server is a ConfigValue with a local implementation.
+type ConfigValue_Server interface {
+	Set(context.Context, ConfigValue_set) error
+
+	Get(context.Context, ConfigValue_get) error
+
+	Name(context.Context, ConfigNode_name) error
+}
+
+// ConfigValue_NewServer creates a new Server from an implementation of ConfigValue_Server.
+func ConfigValue_NewServer(s ConfigValue_Server) *server.Server {
+	c, _ := s.(server.Shutdowner)
+	return server.New(ConfigValue_Methods(nil, s), s, c)
+}
+
+// ConfigValue_ServerToClient creates a new Client from an implementation of ConfigValue_Server.
+// The caller is responsible for calling Release on the returned Client.
+func ConfigValue_ServerToClient(s ConfigValue_Server) ConfigValue {
+	return ConfigValue(capnp.NewClient(ConfigValue_NewServer(s)))
+}
+
+// ConfigValue_Methods appends Methods to a slice that invoke the methods on s.
+// This can be used to create a more complicated Server.
+func ConfigValue_Methods(methods []server.Method, s ConfigValue_Server) []server.Method {
+	if cap(methods) == 0 {
+		methods = make([]server.Method, 0, 3)
+	}
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xd60341b3770f3b3a,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigValue",
+			MethodName:    "set",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Set(ctx, ConfigValue_set{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xd60341b3770f3b3a,
+			MethodID:      1,
+			InterfaceName: "config.capnp:ConfigValue",
+			MethodName:    "get",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Get(ctx, ConfigValue_get{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xf58fa7cf686fe741,
+			MethodID:      0,
+			InterfaceName: "config.capnp:ConfigNode",
+			MethodName:    "name",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Name(ctx, ConfigNode_name{call})
+		},
+	})
+
+	return methods
+}
+
+// ConfigValue_set holds the state for a server call to ConfigValue.set.
+// See server.Call for documentation.
+type ConfigValue_set struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigValue_set) Args() ConfigValue_set_Params {
+	return ConfigValue_set_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigValue_set) AllocResults() (ConfigValue_set_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigValue_set_Results(r), err
+}
+
+// ConfigValue_get holds the state for a server call to ConfigValue.get.
+// See server.Call for documentation.
+type ConfigValue_get struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c ConfigValue_get) Args() ConfigValue_get_Params {
+	return ConfigValue_get_Params(c.Call.Args())
+}
+
+// AllocResults allocates the results struct.
+func (c ConfigValue_get) AllocResults() (ConfigValue_get_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigValue_get_Results(r), err
+}
+
+// ConfigValue_List is a list of ConfigValue.
+type ConfigValue_List = capnp.CapList[ConfigValue]
+
+// NewConfigValue creates a new list of ConfigValue.
+func NewConfigValue_List(s *capnp.Segment, sz int32) (ConfigValue_List, error) {
+	l, err := capnp.NewPointerList(s, sz)
+	return capnp.CapList[ConfigValue](l), err
+}
+
+type ConfigValue_set_Params capnp.Struct
+
+// ConfigValue_set_Params_TypeID is the unique identifier for the type ConfigValue_set_Params.
+const ConfigValue_set_Params_TypeID = 0xc095d4ab02b2a88b
+
+func NewConfigValue_set_Params(s *capnp.Segment) (ConfigValue_set_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigValue_set_Params(st), err
+}
+
+func NewRootConfigValue_set_Params(s *capnp.Segment) (ConfigValue_set_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigValue_set_Params(st), err
+}
+
+func ReadRootConfigValue_set_Params(msg *capnp.Message) (ConfigValue_set_Params, error) {
+	root, err := msg.Root()
+	return ConfigValue_set_Params(root.Struct()), err
+}
+
+func (s ConfigValue_set_Params) String() string {
+	str, _ := text.Marshal(0xc095d4ab02b2a88b, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigValue_set_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigValue_set_Params) DecodeFromPtr(p capnp.Ptr) ConfigValue_set_Params {
+	return ConfigValue_set_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigValue_set_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigValue_set_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigValue_set_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigValue_set_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigValue_set_Params) Value() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return []byte(p.Data()), err
+}
+
+func (s ConfigValue_set_Params) HasValue() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigValue_set_Params) SetValue(v []byte) error {
+	return capnp.Struct(s).SetData(0, v)
+}
+
+// ConfigValue_set_Params_List is a list of ConfigValue_set_Params.
+type ConfigValue_set_Params_List = capnp.StructList[ConfigValue_set_Params]
+
+// NewConfigValue_set_Params creates a new list of ConfigValue_set_Params.
+func NewConfigValue_set_Params_List(s *capnp.Segment, sz int32) (ConfigValue_set_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigValue_set_Params](l), err
+}
+
+// ConfigValue_set_Params_Future is a wrapper for a ConfigValue_set_Params promised by a client call.
+type ConfigValue_set_Params_Future struct{ *capnp.Future }
+
+func (f ConfigValue_set_Params_Future) Struct() (ConfigValue_set_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigValue_set_Params(p.Struct()), err
+}
+
+type ConfigValue_set_Results capnp.Struct
+
+// ConfigValue_set_Results_TypeID is the unique identifier for the type ConfigValue_set_Results.
+const ConfigValue_set_Results_TypeID = 0xdb98311902c02f28
+
+func NewConfigValue_set_Results(s *capnp.Segment) (ConfigValue_set_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigValue_set_Results(st), err
+}
+
+func NewRootConfigValue_set_Results(s *capnp.Segment) (ConfigValue_set_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigValue_set_Results(st), err
+}
+
+func ReadRootConfigValue_set_Results(msg *capnp.Message) (ConfigValue_set_Results, error) {
+	root, err := msg.Root()
+	return ConfigValue_set_Results(root.Struct()), err
+}
+
+func (s ConfigValue_set_Results) String() string {
+	str, _ := text.Marshal(0xdb98311902c02f28, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigValue_set_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigValue_set_Results) DecodeFromPtr(p capnp.Ptr) ConfigValue_set_Results {
+	return ConfigValue_set_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigValue_set_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigValue_set_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigValue_set_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigValue_set_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+
+// ConfigValue_set_Results_List is a list of ConfigValue_set_Results.
+type ConfigValue_set_Results_List = capnp.StructList[ConfigValue_set_Results]
+
+// NewConfigValue_set_Results creates a new list of ConfigValue_set_Results.
+func NewConfigValue_set_Results_List(s *capnp.Segment, sz int32) (ConfigValue_set_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return capnp.StructList[ConfigValue_set_Results](l), err
+}
+
+// ConfigValue_set_Results_Future is a wrapper for a ConfigValue_set_Results promised by a client call.
+type ConfigValue_set_Results_Future struct{ *capnp.Future }
+
+func (f ConfigValue_set_Results_Future) Struct() (ConfigValue_set_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigValue_set_Results(p.Struct()), err
+}
+
+type ConfigValue_get_Params capnp.Struct
+
+// ConfigValue_get_Params_TypeID is the unique identifier for the type ConfigValue_get_Params.
+const ConfigValue_get_Params_TypeID = 0xbd157f0a0d3a28b9
+
+func NewConfigValue_get_Params(s *capnp.Segment) (ConfigValue_get_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigValue_get_Params(st), err
+}
+
+func NewRootConfigValue_get_Params(s *capnp.Segment) (ConfigValue_get_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return ConfigValue_get_Params(st), err
+}
+
+func ReadRootConfigValue_get_Params(msg *capnp.Message) (ConfigValue_get_Params, error) {
+	root, err := msg.Root()
+	return ConfigValue_get_Params(root.Struct()), err
+}
+
+func (s ConfigValue_get_Params) String() string {
+	str, _ := text.Marshal(0xbd157f0a0d3a28b9, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigValue_get_Params) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigValue_get_Params) DecodeFromPtr(p capnp.Ptr) ConfigValue_get_Params {
+	return ConfigValue_get_Params(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigValue_get_Params) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigValue_get_Params) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigValue_get_Params) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigValue_get_Params) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+
+// ConfigValue_get_Params_List is a list of ConfigValue_get_Params.
+type ConfigValue_get_Params_List = capnp.StructList[ConfigValue_get_Params]
+
+// NewConfigValue_get_Params creates a new list of ConfigValue_get_Params.
+func NewConfigValue_get_Params_List(s *capnp.Segment, sz int32) (ConfigValue_get_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return capnp.StructList[ConfigValue_get_Params](l), err
+}
+
+// ConfigValue_get_Params_Future is a wrapper for a ConfigValue_get_Params promised by a client call.
+type ConfigValue_get_Params_Future struct{ *capnp.Future }
+
+func (f ConfigValue_get_Params_Future) Struct() (ConfigValue_get_Params, error) {
+	p, err := f.Future.Ptr()
+	return ConfigValue_get_Params(p.Struct()), err
+}
+
+type ConfigValue_get_Results capnp.Struct
+
+// ConfigValue_get_Results_TypeID is the unique identifier for the type ConfigValue_get_Results.
+const ConfigValue_get_Results_TypeID = 0xf44fa350f3683978
+
+func NewConfigValue_get_Results(s *capnp.Segment) (ConfigValue_get_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigValue_get_Results(st), err
+}
+
+func NewRootConfigValue_get_Results(s *capnp.Segment) (ConfigValue_get_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return ConfigValue_get_Results(st), err
+}
+
+func ReadRootConfigValue_get_Results(msg *capnp.Message) (ConfigValue_get_Results, error) {
+	root, err := msg.Root()
+	return ConfigValue_get_Results(root.Struct()), err
+}
+
+func (s ConfigValue_get_Results) String() string {
+	str, _ := text.Marshal(0xf44fa350f3683978, capnp.Struct(s))
+	return str
+}
+
+func (s ConfigValue_get_Results) EncodeAsPtr(seg *capnp.Segment) capnp.Ptr {
+	return capnp.Struct(s).EncodeAsPtr(seg)
+}
+
+func (ConfigValue_get_Results) DecodeFromPtr(p capnp.Ptr) ConfigValue_get_Results {
+	return ConfigValue_get_Results(capnp.Struct{}.DecodeFromPtr(p))
+}
+
+func (s ConfigValue_get_Results) ToPtr() capnp.Ptr {
+	return capnp.Struct(s).ToPtr()
+}
+func (s ConfigValue_get_Results) IsValid() bool {
+	return capnp.Struct(s).IsValid()
+}
+
+func (s ConfigValue_get_Results) Message() *capnp.Message {
+	return capnp.Struct(s).Message()
+}
+
+func (s ConfigValue_get_Results) Segment() *capnp.Segment {
+	return capnp.Struct(s).Segment()
+}
+func (s ConfigValue_get_Results) Value() ([]byte, error) {
+	p, err := capnp.Struct(s).Ptr(0)
+	return []byte(p.Data()), err
+}
+
+func (s ConfigValue_get_Results) HasValue() bool {
+	return capnp.Struct(s).HasPtr(0)
+}
+
+func (s ConfigValue_get_Results) SetValue(v []byte) error {
+	return capnp.Struct(s).SetData(0, v)
+}
+
+// ConfigValue_get_Results_List is a list of ConfigValue_get_Results.
+type ConfigValue_get_Results_List = capnp.StructList[ConfigValue_get_Results]
+
+// NewConfigValue_get_Results creates a new list of ConfigValue_get_Results.
+func NewConfigValue_get_Results_List(s *capnp.Segment, sz int32) (ConfigValue_get_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return capnp.StructList[ConfigValue_get_Results](l), err
+}
+
+// ConfigValue_get_Results_Future is a wrapper for a ConfigValue_get_Results promised by a client call.
+type ConfigValue_get_Results_Future struct{ *capnp.Future }
+
+func (f ConfigValue_get_Results_Future) Struct() (ConfigValue_get_Results, error) {
+	p, err := f.Future.Ptr()
+	return ConfigValue_get_Results(p.Struct()), err
+}
+
+const schema_9f394813d4260427 = "x\xda\xa4Vmh\x1cE\x18~\xdf\xd9\x99\xdb\xaa9" +
+	"\xcfa\x12\xda(\xa1\x18R\x8d\xc1\x9cM\xed\x9fDK" +
+	"\xae\xd8X[!\xde\x1e*\x8a\xfe\xd9\\6i\xe0n" +
+	"/\xdcnZO\x04\x9bB\xd4&\x04\xa9\x18P\xa4h" +
+	"\x14\xacV\xc4/\xfc\x11\xc1R*(~\xd4\xda\x1a\xc5" +
+	"*\xfd\xa1\x08j!\xf8\xd5\x10\xfb\xa3\xac\xccl\xf6#" +
+	"\x973&\xf4O\xb8\xddy\xf6y\xe6y\xe6\x9d\xf7\xcd" +
+	"\xe6q\x92\xa1\x1d\xc9\xdfu \xc6\xc3,\xe1}\xbck" +
+	"\xe2\xa1\xb9c\xda\x18\xf0&\x04`\xa8\x03\xdczN{" +
+	"\x19\x01\xc5\x9c\xd6\x0d\xe8}p\xf4\xbe\xa6\xb7nn\x7f" +
+	"\x0a\xf8u! IwK@#\x95\x00\xaby\xec\xc7" +
+	"\xdb\x9d\x89\xf18`\x1b\xcdI\xc0.\x09X\x98\xc1\xc7" +
+	"\x1eXxf<&P\xa4\x07\xe4rE}?\xd3\xda" +
+	"\x95\xbc\xf2\xf1\x86\x0f\x817\"\x00\x95\xeb\xcf\xd3f\x04" +
+	"\xeaM\xbc\xf6.ycv\xea\xb8\xbf\xe2\x7f:*\x97" +
+	"P\x1cT\x9f\xeeo}vG\xdf\xf9\x97\xbe\x88o\xfe" +
+	"uzT\x02f\x14 ;[9\xf3\xd5\x9fgOI" +
+	"\x80\xf7\xf6\x0b\x99{\xff\x18\x1dX\x00F\x94Kz-" +
+	"\x8a9\xa9'~\xa3\xfb\x00\xbd\xfaK\xf3'/Lo" +
+	";\x13g\xeba\xca\x88\xc1$[\xd7m\xa9}\xefm" +
+	"\xd7\xbe\x05\x9e\xd4\xbc\x1b\xe9\x0d\xb3\xe2\xae\xce\x17\x01P" +
+	"\x8c\xb2\xcf\xc4$\x93L\x07\xd9\x93\xe2,[\x0f\xe0\x1d" +
+	"\xb2OO\xa7\x1b\x8e|\x07|C`\xebS\xa6l\xb5" +
+	"\xder\x9c4v<\xf7C\xcc\xf0;\xacM\xae\\\xf5" +
+	"\xf9\xdd[\xa7\x1f\xfc\xeb'\x7f\x07~\x14l\xb7\\9" +
+	"\xf6\xd1\x89\xd3\xc5\xfd\xb9\x9f\x97I\x8f\xb1\xef\xc5!%" +
+	"=\xc9v\x8a\xf7\xe5/\xef\x89\x1d_.\xbc\xda\x7f\xee" +
+	"\xd7\xb8\x91\xc3l\\\x1ayS\x19y\xa4s\xcf\xdf\xd9" +
+	"W\xee\xb9\x10\x0f\xf6\xa4\xdc\x02\x8ao\x14`\xfb/\xa5" +
+	"=\xa7\x8e<=\xbfLn\x9e\x9d\x10\x97\x94\xdcE\xb6" +
+	"S\\\x9f\x90ra\xae\xd5\xe0+\x12\xe7ECb=" +
+	"\x80hJ|\"\x0e\xcb_\xde\xd7S\x8fv\xce\x0c\\" +
+	"\xfc\xc7\x8f\xc5\x97\x9eL(\xe9\xa9D7\xb4{\xf9\x92" +
+	"=04\x98\xce3s\xd8\x1e\xee\xbaC=\xf5\x9aE" +
+	"\xcb\x196\xf3V:_\xb6L\xd7\x0a\x9f[\xb2fY" +
+	"7\x8b\x8eA5\x0a@\x11\x80'\xdb\x00\x8cu\x1a\x1a" +
+	"\xf5\x04S\xb6Y\xb4\xb0\x0e\x08\xd6\x01\x86\xcc4\xc6|" +
+	"\xa7\x99wK\xe5\xca\"\xaf\xa43\x8b\x0e@\x9c\xaf\x0f" +
+	"\xc0\xa8\xd3\xd0\xd8@\xd0s\xac\xf2\xde\xa1\xbc\xd5\x0b\xfa" +
+	"\x1a\x89s\x963Rpq\xc9Fs1b{\xd1\x11" +
+	"\xa0\x85<J\x14\x10yL`\xa5L\xee7\x0b#\xa1" +
+	"\x815\xe5\xa1\xc5X\x15Kz\xd0r\x83dW@9" +
+	"\x11*\xae\xb7%\xd2\xdb\xb8W\x021\x09\x04\x93\xab\xb4" +
+	"\x11\x1dm\xcerR#\x05\xf72#\xd3jj\xf5\xd8" +
+	"\xaeV\xaed\x11\x8du!\xf9M2\xa8\x16\x0d\x8d\xcd" +
+	"\x049b=\xca\x97\xed\xf2e\xab\x86\xc6\xd6\xaa\xf4R" +
+	"v\xa9_\xea\x867\xa5J\x97\xd6\xd4-\x0c9n\xcd" +
+	"Z\x08\x0e\xa9\x85`J\x82\xf0j\xc0\xac\x86xM\xd4" +
+	"\xc2\x00\xe5\xcbP\x80T\x9f\x07\x80\xef\x87\x01\x84\x9d\x13" +
+	"\x83^\xc3;\x9a\x81\xf0M:F\xfd\x16\x83.\xc0\x1b" +
+	"\xe5ZR\xd7\x1d\xcb\xcd\xa0>(\xff\x1a\x14c]\x00" +
+	"\xa0v\x9e\xa5~+-CYe\xb1\x04'\xba\x9a\x90" +
+	"\x82\x9bX\xd3\xaf\xba\\\x8b\x07H\x95\xe1`Ja0" +
+	"\x8d8\xef\x02\xc2\x99\xde\xed\x97U\x06\xb3\xb8\x96{\xe4" +
+	"\x9fQU'X^\xd9<\x9a\x09+\xd4]t\xa9j" +
+	"\xd5\xf4\xff\xdf\x17R\x959D\xbe\x83)\x83A_\xe5" +
+	"\xbcM\xf9V\xc5\xba\xd45\xa9v\x9d\x92\xb6\xd5IG" +
+	"s\x12\xb7l\xec\xb1\xddr\xc5\xa8S\xfc\xc1D\xc2`" +
+	"8rC\xf2\xf7\xe8\x18\xce\xf5\xd8\xb8\xe9\xec\x03\xc2;" +
+	"t$\xe1\xbf\x15\x18\x8ch\xbe\xe9\x00\x10\xde\xa4\xab\xea" +
+	"\xce\xa0\x17\x84\x0dza\xc4\x0a\x9f{M\\<\x0dX" +
+	"s\x0d\xd6\xca\xf6\xbfz\xdf\xbf\x01\x00\x00\xff\xff\xe0\x13" +
+	"\x945"
 
 func RegisterSchema(reg *schemas.Registry) {
 	reg.Register(&schemas.Schema{
 		String: schema_9f394813d4260427,
 		Nodes: []uint64{
+			0x8503beed5b8b49c6,
 			0x882d2caf1d55aaba,
 			0x8a8b733ce1852265,
+			0x8a92f758007c01b9,
+			0xbd157f0a0d3a28b9,
+			0xc095d4ab02b2a88b,
+			0xcca0ea6244942880,
+			0xcfd9f1d0d279d450,
+			0xd23da1f4cdf5fd14,
+			0xd60341b3770f3b3a,
+			0xd8a7152ea1d16e91,
+			0xdb98311902c02f28,
+			0xe2f259a1344bcb0b,
 			0xe452806dd1c2c3be,
+			0xe8dd64a6f7ce4486,
+			0xf44fa350f3683978,
+			0xf58fa7cf686fe741,
+			0xf76681f054409bb0,
+			0xf8f966b9397a95d3,
 		},
 		Compressed: true,
 	})

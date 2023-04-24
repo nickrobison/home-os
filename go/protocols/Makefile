@@ -1,6 +1,6 @@
 SRC_DIR := ../../protocols
 DEST_DIR := .
-SOURCES := $(notdir $(wildcard $(SRC_DIR)/*.capnp))
+SOURCES := config.capnp
 SOURCE_TARGETS := $(patsubst %,$(DEST_DIR)/%.capnp, $(basename $(SOURCES)))
 DEST_TARGETS := $(patsubst %,$(DEST_DIR)/%.capnp.go, $(basename $(SOURCES)))
 PREFIX_STRING := 'using Go = import "\/go.capnp";\n$$Go.package("protocols");\n$$Go.import("protocols");\n'

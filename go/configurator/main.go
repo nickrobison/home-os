@@ -41,7 +41,7 @@ func main() {
 }
 
 func serverServer(ctx context.Context, rwc io.ReadWriteCloser) error {
-	server, err := CreateConfigServer(ctx, []string{""})
+	server, err := CreateConfigFactory(ctx, []string{""})
 	if err != nil {
 		return err
 	}
