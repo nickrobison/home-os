@@ -1,15 +1,20 @@
 {pkgs, crane, fenix, system}:
   let
     craneLib = crane.mkLib pkgs;
-    src = craneLib.cleanCargoSource ./.;
+    capnpFilter = path: _type: builtins.match ".*capnp$" path != null;
+    capnpOrCargo = path: type: (capnpFilter path type) || (craneLib.filterCargoSources path type);
+    unfilteredRoot = ./.;
+    src = lib.cleanSourceWith {
+      src = unfilteredRoot;
+      filter = capnpOrCargo;
+      name = "source";
+    };
 
     inherit (pkgs) lib;
 
     commonArgs = {
       inherit src;
       strictDeps = true;
-
-      buildInputs = [pkgs.capnproto];
     };
     craneLibLLvmTools = craneLib.overrideToolchain (fenix.packages.${system}.complete.withComponents [
 "cargo"
@@ -22,14 +27,17 @@
       inherit cargoArtifacts;
       inherit (craneLib.crateNameFromCargoToml { inherit src;}) version;
       doCheck = false;
-    };
 
+      nativeBuildInputs = [pkgs.capnproto];
+    };
     fileSetForCrate = crate: lib.fileset.toSource {
-      root = ./.;
+      root = unfilteredRoot;
       fileset = lib.fileset.unions [
         ./Cargo.toml
         ./Cargo.lock
         (craneLib.fileset.commonCargoSources ./protocols_rs)
+        (lib.fileset.fileFilter (file: file.hasExt "capnp") unfilteredRoot)
+        ./protocols_rs/protocols
         (craneLib.fileset.commonCargoSources crate)
       ];
     };

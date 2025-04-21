@@ -38,7 +38,7 @@
                 pinger = rustPackages.pinger;
               };
               devShells.default = mkShell {
-                inputsFrom = builtins.attrValues ocamlPackages;
+                inputsFrom = builtins.attrValues ocamlPackages ++ [rustPackages.pinger];
                 buildInputs = [ capnproto ] ++ ocamlDevPackages ++ rustPackages.devPkgs;
               };
             });
