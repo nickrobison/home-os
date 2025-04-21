@@ -40,4 +40,7 @@ target/
 _opam
 
 # Direnv
-.direnv/
+.direnv
+
+# Nix
+result
