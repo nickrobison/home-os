@@ -11,7 +11,7 @@ depends: [
   "cmdliner"
   "logs"
   "capnp-rpc-unix"
-  "irmin-unix" {< "3.0.0"}
+  "irmin-unix"
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

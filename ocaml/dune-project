@@ -25,7 +25,7 @@
     capnp-rpc-lwt
     logs
     fmt
-    (irmin-git (< 3.0.0))
+    irmin-git
     ppx_deriving
     ppx_import
     ezjsonm
@@ -40,5 +40,6 @@ uuidm))
     cmdliner
     logs
     capnp-rpc-unix
-    (irmin-unix (< 3.0.0))
+    irmin-unix
     (alcotest :with-test)))
+
