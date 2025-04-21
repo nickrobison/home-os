@@ -4,22 +4,23 @@
  (ocamlc_flags :standard -w -55-53)
  (ocamlopt_flags :standard -w -55-53)
  (libraries capnp))
+(copy_files protocols/*capnp)
 
 (rule
  (targets registration.ml registration.mli)
- (deps protocols/registration.capnp)
+ (deps registration.capnp)
  (action
   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
 
 (rule
  (targets registrar.ml registrar.mli)
- (deps protocols/registrar.capnp)
+ (deps registrar.capnp)
  (action
   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
 
 (rule
  (targets services.ml services.mli)
- (deps ./protocols/services.capnp)
+ (deps services.capnp)
  (action
   (run capnp compile -o %{bin:capnpc-ocaml} %{deps})))
 
