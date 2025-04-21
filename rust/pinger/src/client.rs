@@ -69,7 +69,7 @@ async fn try_main(conf: Config) -> Result<()> {
                     Ok(r) => {
                         let response = r.get()?;
                         let msg = response.get_response()?;
-                        info!("Received `{}` from service", msg);
+                        info!("Received `{:#?}` from service", msg);
                         Ok(())
                     }
                     Err(err) => {
