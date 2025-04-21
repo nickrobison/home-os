@@ -6,10 +6,9 @@
   capnp
   capnp-rpc-lwt
   logs
-  lwt
+  lwt.unix
   homeos_protocols
   irmin
-  irmin-unix
   uuidm
   ezjsonm
   digestif)

@@ -22,7 +22,7 @@
     (alcotest :with-test)
     (alcotest-lwt :with-test)
     dune
-    capnp-rpc-lwt
+    (capnp-rpc-lwt (< 2.0))
     logs
     fmt
     irmin-git
@@ -39,7 +39,6 @@ uuidm))
   (depends
     cmdliner
     logs
-    capnp-rpc-unix
-    irmin-unix
+    (capnp-rpc-unix (< 2.0))
     (alcotest :with-test)))
 

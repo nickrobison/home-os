@@ -1,9 +1,12 @@
 module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 
-(** Simple abstraction layer over the `info` command for Irmin, not sure why there isn't one already, but this works with 2.x*)
+(** Simple abstraction layer over the `info` command for Irmin, not sure why
+    there isn't one already, but this works with 2.x*)
 module type Info = sig
   val info :
-    ?author:string -> ('a, Format.formatter, unit, Irmin.Info.f) format4 -> 'a
+    ?author:string ->
+    ('a, Format.formatter, unit, Irmin.Info.default) format4 ->
+    'a
 end
 
 module type S = sig

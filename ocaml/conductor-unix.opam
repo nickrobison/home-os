@@ -10,8 +10,7 @@ depends: [
   "dune" {>= "2.8"}
   "cmdliner"
   "logs"
-  "capnp-rpc-unix"
-  "irmin-unix"
+  "capnp-rpc-unix" {< "2.0"}
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

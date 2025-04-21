@@ -40,7 +40,7 @@ end = struct
 
   let make request =
     let name = R.Reader.RegistrationRequest.name_get request in
-    let id = Uuidm.v `V4 in
+    let id = Uuidm.v4_gen (Random.State.make_self_init ()) () in
     let hashed = hash ~name in
     { id; name; status = Pending; hash = hashed; details = request }
 end
