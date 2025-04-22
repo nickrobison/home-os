@@ -17,6 +17,10 @@
       inputs.rust-analyzer-src.follows = "";
     };
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    advisory-db = {
+      url = "github:rustsec/advisory-db";
+      flake = false;
+    };
   };
 
   outputs =
@@ -28,6 +32,7 @@
       crane,
       fenix,
       treefmt-nix,
+      advisory-db,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -51,22 +56,21 @@
         ocamlPackages = pkgs.lib.getAttrs (builtins.attrNames localPackagesQuery) scope;
         rustPackages = (
           pkgs.callPackage ./rust/build.nix {
-            inherit fenix;
-            inherit crane;
+            inherit fenix crane advisory-db;
           }
         );
+        rustChecks = rustPackages.checks;
       in
       with pkgs;
       rec {
         formatter = treefmtEval.config.build.wrapper;
         checks = {
           formatting = treefmtEval.config.build.check self;
-        };
+        } // rustChecks;
         legacyPackages = scope;
         packages = {
-          inherit ocamlPackages;
           pinger = rustPackages.pinger;
-        };
+        } // ocamlPackages;
         devShells.default = mkShell {
           inputsFrom = builtins.attrValues ocamlPackages ++ [ rustPackages.pinger ];
           buildInputs = [ capnproto ] ++ ocamlDevPackages ++ rustPackages.devPkgs;

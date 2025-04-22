@@ -3,6 +3,7 @@
   crane,
   fenix,
   system,
+  advisory-db,
 }:
 let
   craneLib = crane.mkLib pkgs;
@@ -36,6 +37,7 @@ let
     doCheck = false;
 
     nativeBuildInputs = [ pkgs.capnproto ];
+
   };
   fileSetForCrate =
     crate:
@@ -61,6 +63,23 @@ let
 in
 with pkgs;
 {
+  checks = {
+    clippy = craneLib.cargoClippy (
+      commonArgs
+      // {
+        inherit cargoArtifacts;
+        cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+      }
+    );
+
+    cargoAudit = craneLib.cargoAudit {
+      inherit src advisory-db;
+    };
+  };
   inherit pinger;
-  devPkgs = [ cowsay ];
+  devPkgs = [
+    cargo-audit
+    cargo-watch
+    cargo-deny
+  ];
 }
