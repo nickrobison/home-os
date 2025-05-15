@@ -30,10 +30,10 @@ impl registration_callback::Server for RegistrationCallbackImpl {
             let svc_count = services.len();
             info!("Resolver resolved {} services", svc_count);
             let pinger_svc = services.get(0);
-            info!("I have a service named: {}", pinger_svc.get_name()?);
+            info!("I have a service named: {:#?}", pinger_svc.get_name()?);
 
 
-            // Get the pinger
+            // get the pinger
             return match pinger_svc.which()? {
                 service::Ping(pinger) => {
                     channel.send(Result::Ok(pinger?)).await

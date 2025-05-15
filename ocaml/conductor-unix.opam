@@ -8,10 +8,11 @@ homepage: "https://github.com/nickrobison/home-os"
 bug-reports: "https://github.com/nickrobison/home-os/issues"
 depends: [
   "dune" {>= "2.8"}
+  "conductor" {= version}
   "cmdliner"
   "logs"
-  "capnp-rpc-unix"
-  "irmin-unix" {< "3.0.0"}
+  "irmin-git"
+  "capnp-rpc-unix" {< "2.0"}
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

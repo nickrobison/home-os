@@ -1,6 +1,6 @@
 (executable
  (name test)
- (libraries alcotest alcotest-lwt conductor))
+ (libraries alcotest alcotest-lwt conductor irmin-git.unix))
 
 (rule
  (alias runtest)

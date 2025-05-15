@@ -2,10 +2,7 @@ open Lwt.Syntax
 module Db_memory = Db_memory
 module Models = Models
 
-module Make
-    (Store : Irmin.KV with type contents = Irmin.Contents.Json_value.t)
-    (I : Db.Info) =
-struct
+module Make (Store : Irmin.KV) = struct
   module DB = Db_memory
   module Registrar = Registrar.Make (DB)
 

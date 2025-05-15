@@ -10,5 +10,5 @@
   logs.cli
   fmt.cli
   fmt.tty
-  irmin-unix
+  irmin-git.unix
   capnp-rpc-unix))

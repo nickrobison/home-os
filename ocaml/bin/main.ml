@@ -3,12 +3,12 @@ open Lwt.Infix
 let src = Logs.Src.create "Conductor(Main)" ~doc:"HomeOS Conductor (Main)"
 
 module Info = struct
-  let info = Irmin_unix.info
+  let info = Irmin_git_unix.info
 end
 
 module Log = (val Logs.src_log src : Logs.LOG)
-module Store = Irmin_unix.Git.FS.KV (Irmin.Contents.Json_value)
-module Conductor = Conductor.Make (Store) (Info)
+module Store = Irmin_git_unix.FS.KV (Irmin.Contents.Json_value)
+module Conductor = Conductor.Make (Store)
 
 let () =
   Logs.set_level (Some Logs.Info);
@@ -37,9 +37,6 @@ let start_server =
 
 open Cmdliner
 
-let serve_cmd =
-  ( Term.(const start_server),
-    let doc = "run server" in
-    Term.info "serve" ~doc )
-
-let () = Term.eval serve_cmd |> Term.exit
+let serve_term = Term.const start_server
+let sc = Cmd.v (Cmd.info "serve") serve_term
+let () = Cmd.eval sc |> exit

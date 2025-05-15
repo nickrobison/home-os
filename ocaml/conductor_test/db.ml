@@ -1,10 +1,10 @@
 open Lwt.Syntax
 
 module Info = struct
-  let info = Irmin_unix.info
+  let info = Irmin_git_unix.info
 end
 
-module Store = Irmin_mem.KV (Irmin.Contents.Json_value)
+module Store = Irmin_mem.KV.Make (Irmin.Contents.Json_value)
 module DB = Conductor.Db_memory
 module Reg = Homeos_protocols.Registration.Make (Capnp.BytesMessage)
 

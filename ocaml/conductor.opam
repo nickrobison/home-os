@@ -8,16 +8,16 @@ homepage: "https://github.com/nickrobison/home-os"
 bug-reports: "https://github.com/nickrobison/home-os/issues"
 depends: [
   "ocaml" {>= "4.12"}
+  "homeos-protocols" {= version}
   "alcotest" {with-test}
   "alcotest-lwt" {with-test}
   "dune" {>= "2.8"}
-  "capnp-rpc-lwt"
+  "capnp-rpc-lwt" {< "2.0"}
   "logs"
   "fmt"
-  "irmin-git" {< "3.0.0"}
+  "irmin-git"
   "ppx_deriving"
   "ppx_import"
-  "ezjsonm"
   "digestif"
   "uuidm"
   "odoc" {with-doc}

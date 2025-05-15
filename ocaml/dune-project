@@ -9,7 +9,7 @@
 (authors "Nick Robison <nick@nickrobison.com>")
 
 (package
-  (name homesos_protocols)
+  (name homeos-protocols)
   (synopsis "Core HomeOS Capnp protocols")
   (depends
     capnp))
@@ -19,26 +19,28 @@
   (synopsis "Core HomeOS conductor library")
   (depends
     (ocaml (>= 4.12))
+    (homeos-protocols (= :version))
     (alcotest :with-test)
     (alcotest-lwt :with-test)
     dune
-    capnp-rpc-lwt
+    (capnp-rpc-lwt (< 2.0))
     logs
     fmt
-    (irmin-git (< 3.0.0))
+    irmin-git
     ppx_deriving
     ppx_import
-    ezjsonm
     digestif
-uuidm))
+    uuidm))
 
 
 (package
   (name conductor-unix)
   (synopsis "HomeOS Conductor application")
   (depends
+    (conductor (= :version))
     cmdliner
     logs
-    capnp-rpc-unix
-    (irmin-unix (< 3.0.0))
+    irmin-git
+    (capnp-rpc-unix (< 2.0))
     (alcotest :with-test)))
+

@@ -6,12 +6,10 @@
   capnp
   capnp-rpc-lwt
   logs
-  lwt
+  lwt.unix
   homeos_protocols
   irmin
-  irmin-unix
   uuidm
-  ezjsonm
   digestif)
  (preprocess
   (staged_pps ppx_import ppx_deriving.eq ppx_deriving.ord ppx_deriving.show)))
